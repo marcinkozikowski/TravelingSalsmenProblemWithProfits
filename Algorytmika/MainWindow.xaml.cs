@@ -61,7 +61,22 @@ namespace Algorytmika
                         Canvas.SetTop(ellipse, node.Y);
                         canvas.Children.Add(ellipse);
                     }
-                    alg.getRoute(7600, 1);
+                    
+                    List<Node> route = alg.GreedyRouteConstruction(7600);
+                    int a = route.Count;
+                    for (int i=0;i<route.Count-1;i++)
+                    {
+                        Line line = new Line();
+                        line.Stroke = Brushes.Red;
+
+                        line.X1 = route.ElementAt(i).X;
+                        line.X2 = route.ElementAt(i+1).X;
+                        line.Y1 = route.ElementAt(i).Y;
+                        line.Y2 = route.ElementAt(i+1).Y;
+
+                        line.StrokeThickness = 2;
+                        canvas.Children.Add(line);
+                    }
                 }
             }
             catch (Exception ex)

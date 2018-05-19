@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -71,10 +72,66 @@ namespace Algorytmika
             }
         }
 
-        private void GreedyRouteConstruction()
+        public List<Node> GreedyRouteConstruction(double maxDistance)
         {
+            double distance = 0;
             List<Node> route = new List<Node>();    //construct route
+            List<Node> unvisited = NodesList;
             route.Add(NodesList.ElementAt(0));      //add first point to route
+            Node currentNode;
+            Node startNode = route.ElementAt(0);
+            unvisited.Remove(startNode);
+            currentNode = startNode;
+            while (distance < maxDistance)
+            {
+                Node best = GetTheBestNode(currentNode,unvisited);
+                if (CheckDistance(distance,maxDistance,currentNode,best,startNode))
+                {
+                    distance = distance + NodeDistances[currentNode.Position, best.Position];
+                    route.Add(best);
+                    unvisited.Remove(best);
+                    currentNode = best;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return route;
+
+        }
+
+        private bool CheckDistance(double currentDistance, double maxDistance, Node current, Node next,Node start)
+        {
+            if (NodeDistances[current.Position, next.Position] + currentDistance < maxDistance)
+            {
+                double tempDistance = NodeDistances[current.Position, next.Position] + currentDistance;
+                if (tempDistance + NodeDistances[next.Position, start.Position] <= maxDistance)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private Node GetTheBestNode(Node current,List<Node> unvistedNodes)
+        {
+            Node best=new Node();
+            double bestProfit = 0;
+            foreach (var n in unvistedNodes)
+            {
+                if (current != n)
+                {
+                    if ((NodeDistances[current.Position, n.Position])/n.Profit > bestProfit)
+                    {
+                        best = n;
+                    }
+                }
+            }
+
+            return best;
         }
 
         public void getRoute(double maxDistance, int startPoint)
