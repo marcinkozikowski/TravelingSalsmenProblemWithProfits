@@ -77,6 +77,16 @@ namespace Algorytmika
                         line.StrokeThickness = 2;
                         canvas.Children.Add(line);
                     }
+                    Line line1 = new Line();
+                    line1.Stroke = Brushes.Red;
+
+                    line1.X1 = route.ElementAt(0).X;
+                    line1.X2 = route.ElementAt(route.Count-1).X;
+                    line1.Y1 = route.ElementAt(0).Y;
+                    line1.Y2 = route.ElementAt(route.Count - 1).Y;
+
+                    line1.StrokeThickness = 2;
+                    canvas.Children.Add(line1);
                 }
             }
             catch (Exception ex)

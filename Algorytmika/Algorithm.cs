@@ -75,19 +75,21 @@ namespace Algorytmika
         public List<Node> GreedyRouteConstruction(double maxDistance)
         {
             double distance = 0;
+            double profit = 0;
             List<Node> route = new List<Node>();    //construct route
             List<Node> unvisited = NodesList;
             route.Add(NodesList.ElementAt(0));      //add first point to route
             Node currentNode;
-            Node startNode = route.ElementAt(0);
+            Node startNode = GetNodeWithHighestProfit();
             unvisited.Remove(startNode);
             currentNode = startNode;
             while (distance < maxDistance)
             {
-                Node best = GetTheBestNode(currentNode,unvisited);
+                Node best = GetTheBestNode(currentNode,unvisited,distance,profit);
                 if (CheckDistance(distance,maxDistance,currentNode,best,startNode))
                 {
                     distance = distance + NodeDistances[currentNode.Position, best.Position];
+                    profit = profit + best.Profit;
                     route.Add(best);
                     unvisited.Remove(best);
                     currentNode = best;
@@ -116,7 +118,7 @@ namespace Algorytmika
             return false;
         }
 
-        private Node GetTheBestNode(Node current,List<Node> unvistedNodes)
+        private Node GetTheBestNode(Node current,List<Node> unvistedNodes,double distance,double profit)
         {
             Node best=new Node();
             double bestProfit = 0;
@@ -124,14 +126,32 @@ namespace Algorytmika
             {
                 if (current != n)
                 {
-                    if ((NodeDistances[current.Position, n.Position])/n.Profit > bestProfit)
+                    if ((n.Profit+profit)/ (NodeDistances[current.Position, n.Position]+distance) > bestProfit)
                     {
                         best = n;
+                        bestProfit = (n.Profit + profit) / (NodeDistances[current.Position, n.Position] + distance);
                     }
                 }
             }
 
             return best;
+        }
+
+        private Node GetNodeWithHighestProfit()
+        {
+            double profit = 0;
+            Node best = new Node();
+            foreach (var n in NodesList)
+            {
+                if (n.Profit > profit)
+                {
+                    best = n;
+                    profit = best.Profit;
+                }
+            }
+
+            return best;
+
         }
 
         public void getRoute(double maxDistance, int startPoint)
