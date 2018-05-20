@@ -40,7 +40,7 @@ namespace Algorytmika
             openFileDialog1.Filter = "txt files (*.txt)|*.txt";
             openFileDialog1.FilterIndex = 2;
             openFileDialog1.RestoreDirectory = true;
-
+            Route route = new Route();
             try
             {
                 openFileDialog1.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
@@ -63,7 +63,7 @@ namespace Algorytmika
                     }
                     
                     //TODO make some method to draw calculated route 
-                    Route route = alg.GreedyRouteConstruction(7600);
+                    route = alg.GreedyRouteConstruction(7600);
                     int a = route.CalculatedRoute.Count;
                     for (int i=0;i< route.CalculatedRoute.Count - 1;i++)
                     {
@@ -93,12 +93,14 @@ namespace Algorytmika
                     profitL.Content = route.RouteProfit.ToString();
                     pointsL.Content = route.CalculatedRoute.Count.ToString();
                     lengthL.Content = route.Distance.ToString();
+
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error: Nie można odczytać pliku z danymi: " + ex.Message);
+                MessageBox.Show("Error: Nie można odczytać pliku z danymi: " + ex.Message,"Wczytywanie danych",MessageBoxButton.OK,MessageBoxImage.Error);
             }
+            List<Node> optimalized = alg.TwoOpt(route);
         }
 
         private void ExitAppClick(object sender, RoutedEventArgs e)

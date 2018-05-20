@@ -72,6 +72,58 @@ namespace Algorytmika
             }
         }
 
+        public void getRoute(double maxDistance, int startPoint)
+        {
+            var currentNode = NodesList.First(p => p.Position == startPoint - 1);
+            var list = new List<int>();
+            currentNode.Visited = true;
+            double currentProfit = currentNode.Profit;
+            var notVisitedNodes = new List<Node>(NodesList);
+            list.Add(currentNode.Position);
+            notVisitedNodes.Remove(currentNode);
+
+            double distance = 0;
+            while (true)
+            {
+                Node nextNode = null;
+                double bestResult = 0;
+                //wez srednio najlepszy punkt.
+                foreach (var notVisitedNode in NodesList)
+                {
+                    if (notVisitedNode.Visited == false)
+                    {
+                        var result = notVisitedNode.Profit /
+                                     NodeDistances[currentNode.Position, notVisitedNode.Position];
+                        if (result > bestResult &&
+                            distance + NodeDistances[currentNode.Position, notVisitedNode.Position] <= maxDistance)
+                        {
+                            bestResult = result;
+                            nextNode = notVisitedNode;
+                        }
+                    }
+                }
+
+                //isc randomowo po bliskich dosc dobrych miastach, i miec ok. pol odleglosci powrotnej w zapasie jak zblizymy sie do tej wartosci wracamy.
+                if (nextNode == null)
+                {
+                    break;
+                }
+
+                nextNode.Visited = true;
+                currentProfit += nextNode.Profit;
+                distance += NodeDistances[currentNode.Position, nextNode.Position];
+                //var pair = new Tuple<Node,Node>(currentNode,nextNode);
+                //Connections.Add(pair);
+                //list.Add(nextNode.Position);
+                currentNode = nextNode;
+            }
+
+            currentSequence = list.ToArray();
+
+        }
+
+        #region Greedy Route Construction + help methods
+
         public Route GreedyRouteConstruction(double maxDistance)
         {
             double distance = 0;
@@ -80,9 +132,10 @@ namespace Algorytmika
             List<Node> unvisited = NodesList;
             route.Add(NodesList.ElementAt(0));      //add first point to route
             Node currentNode;
-            Node startNode = GetNodeWithHighestProfit();
+            Node startNode = NodesList.ElementAt(0);
             unvisited.Remove(startNode);
             currentNode = startNode;
+
             while (distance < maxDistance)
             {
                 Node best = GetTheBestNode(currentNode,unvisited,distance,profit); //get whivh has the best overal profil to distance
@@ -159,76 +212,84 @@ namespace Algorytmika
 
         }
 
-        public void getRoute(double maxDistance, int startPoint)
-        {
-            var currentNode = NodesList.First(p => p.Position == startPoint - 1);
-            var list = new List<int>();
-            currentNode.Visited = true;
-            double currentProfit = currentNode.Profit;
-            var notVisitedNodes = new List<Node>(NodesList);
-            list.Add(currentNode.Position);
-            notVisitedNodes.Remove(currentNode);
+        #endregion
 
-            double distance = 0;
-            while (true)
+       public List<Node> TwoOpt(Route currentRoute)
+        {
+            List<Node> newRoute = new List<Node>();
+            List<Node> bestRoute = currentRoute.CalculatedRoute;
+            int n = currentRoute.CalculatedRoute.Count;
+            double newProfit = 0;
+            double bestProfit = currentRoute.RouteProfit;
+            bool improve = true;
+            while (improve)
             {
-                Node nextNode = null;
-                double bestResult = 0;
-                //wez srednio najlepszy punkt.
-                foreach (var notVisitedNode in NodesList)
+                improve = false;
+                for (int i = 1; i < n - 2; i++)
                 {
-                    if (notVisitedNode.Visited == false)
+                    for (int k = i + 1; k < n-1; k++)
                     {
-                        var result = notVisitedNode.Profit /
-                                     NodeDistances[currentNode.Position, notVisitedNode.Position];
-                        if (result > bestResult &&
-                            distance + NodeDistances[currentNode.Position, notVisitedNode.Position] <= maxDistance)
+                        double d1 =
+                            NodeDistances[bestRoute.ElementAt(i).Position, bestRoute.ElementAt(i + 1).Position] +
+                            NodeDistances[bestRoute.ElementAt(k).Position, bestRoute.ElementAt(k + 1).Position];
+
+                        double d2 = NodeDistances[bestRoute.ElementAt(i).Position, bestRoute.ElementAt(k).Position] +
+                                    NodeDistances[bestRoute.ElementAt(i+1).Position, bestRoute.ElementAt(k + 1).Position];
+
+                        // if distance can be shortened, adjust the tour
+                        if (d2 < d1)
                         {
-                            bestResult = result;
-                            nextNode = notVisitedNode;
+                            bestRoute = optSwap(bestRoute, i, k);
+                            improve = true;
                         }
                     }
                 }
-
-                //isc randomowo po bliskich dosc dobrych miastach, i miec ok. pol odleglosci powrotnej w zapasie jak zblizymy sie do tej wartosci wracamy.
-                if (nextNode == null)
-                {
-                    break;
-                }
-
-                nextNode.Visited = true;
-                currentProfit += nextNode.Profit;
-                distance += NodeDistances[currentNode.Position, nextNode.Position];
-                //var pair = new Tuple<Node,Node>(currentNode,nextNode);
-                //Connections.Add(pair);
-                //list.Add(nextNode.Position);
-                currentNode = nextNode;
             }
 
-            currentSequence = list.ToArray();
+            return bestRoute;
 
         }
 
-        private void TwoOpt(int size, double currentDistance)
+        private List<Node> optSwap(List<Node >route,int i, int k)
         {
-            
-            var iteration = 0;
-            for (int i = 0; i < size; i++)
+            Node current;
+            List<Node> newRoute=new List<Node>();
+            List<Node> temp = new List<Node>();
+            List<Node> order = new List<Node>();
+
+
+            //1.take route[0] to route[i - 1] and add them in order to new_route
+            for (int a = 0; a < i; a++)
             {
-                for (int j = i; j < size; j++)
-                {
-                    
-                }
+                newRoute.Add(route.ElementAt(i));
             }
-            
+            //2.take route[i] to route[k] and add them in reverse order to new_route
+            for (int b = i; b < k + 1; b++)
+            {
+                temp.Add(route.ElementAt(b));
+            }
+            temp.Reverse();
+            newRoute.AddRange(temp);
+            for (int c = k + 1; c < route.Count; c++)
+            {
+                newRoute.Add(route.ElementAt(c));
+            }
+            //3.take route[k + 1] to end and add them in order to new_route
+            return newRoute;
+        }
+
+        private void TwoOptSwap(int i, int k)
+        {
+
         }
 
         public static int[] TwoOptSwap(int[] sequence, int i, int k)
         {
+            List<Node> next = new List<Node>();
+            
             int[] nextSequence = new int[sequence.Length];
             Array.Copy(sequence, nextSequence, sequence.Length);
             Array.Reverse(nextSequence, i, k - i + 1);
-
             return nextSequence;
         }
     }
