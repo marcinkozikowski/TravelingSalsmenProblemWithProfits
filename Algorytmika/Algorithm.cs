@@ -215,12 +215,13 @@ namespace Algorytmika
 
         #endregion
 
-       public List<Node> TwoOpt(Route currentRoute)
+       public Route TwoOpt(Route currentRoute)
         {
             List<Node> newRoute = new List<Node>();
             List<Node> bestRoute = new List<Node>(currentRoute.CalculatedRoute);
             int n = currentRoute.CalculatedRoute.Count;
-            double newProfit = 0;
+            double newDist = 0;
+            double bestDist = currentRoute.Distance;
             bool improve = true;
             int count = 0;
             while (count<20)
@@ -230,28 +231,48 @@ namespace Algorytmika
                 {
                     for (int k = i + 1; k < n-1; k++)
                     {
-                        double d1 =
-                            NodeDistances[bestRoute.ElementAt(i).Position, bestRoute.ElementAt(i + 1).Position] +
-                            NodeDistances[bestRoute.ElementAt(k).Position, bestRoute.ElementAt(k + 1).Position];
+                        //double d1 =
+                        //    NodeDistances[bestRoute.ElementAt(i).Position, bestRoute.ElementAt(i + 1).Position] +
+                        //    NodeDistances[bestRoute.ElementAt(k).Position, bestRoute.ElementAt(k + 1).Position];
 
-                        double d2 = NodeDistances[bestRoute.ElementAt(i).Position, bestRoute.ElementAt(k).Position] +
-                                    NodeDistances[bestRoute.ElementAt(i+1).Position, bestRoute.ElementAt(k + 1).Position];
+                        //double d2 = NodeDistances[bestRoute.ElementAt(i).Position, bestRoute.ElementAt(k).Position] +
+                        //            NodeDistances[bestRoute.ElementAt(i+1).Position, bestRoute.ElementAt(k + 1).Position];
 
-                        // if distance can be shortened, adjust the tour
-                        if (d2 < d1)
+                        newRoute = optSwap(bestRoute, i, k);
+                        newDist = CalcDistance(newRoute);
+                        if (newDist < bestDist)
                         {
-                            newRoute = optSwap(bestRoute, i, k);
                             bestRoute = newRoute;
+                            bestDist = newDist;
                             improve = true;
                         }
+                        //// if distance can be shortened, adjust the tour
+                        //if (d2 < d1)
+                        //{
+                        //    newRoute = optSwap(bestRoute, i, k);
+                        //    bestRoute = newRoute;
+                        //    improve = true;
+                        //}
                     }
                 }
 
                 count++;
             }
+            Route r = new Route();
+            r.CalculatedRoute = bestRoute;
+            r.Distance = bestDist;
+            return r;
 
-            return bestRoute;
+        }
 
+        private double CalcDistance(List<Node> route)
+        {
+            double dist = 0;
+            for (int i = 0; i < route.Count - 2; i++)
+            {
+                dist = dist + NodeDistances[i, i + 1];
+            }
+            return dist;
         }
 
         private List<Node> optSwap(List<Node >route,int i, int k)
@@ -274,11 +295,12 @@ namespace Algorytmika
             }
             temp.Reverse();
             newRoute.AddRange(temp);
-            for (int c = k + 1; c < route.Count; c++)
+            //3.take route[k + 1] to end and add them in order to new_route
+            for (int c = k +1; c < route.Count; c++)
             {
                 newRoute.Add(route.ElementAt(c));
             }
-            //3.take route[k + 1] to end and add them in order to new_route
+            
             return newRoute;
         }
 
