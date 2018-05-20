@@ -62,17 +62,18 @@ namespace Algorytmika
                         canvas.Children.Add(ellipse);
                     }
                     
-                    List<Node> route = alg.GreedyRouteConstruction(7600);
-                    int a = route.Count;
-                    for (int i=0;i<route.Count-1;i++)
+                    //TODO make some method to draw calculated route 
+                    Route route = alg.GreedyRouteConstruction(7600);
+                    int a = route.CalculatedRoute.Count;
+                    for (int i=0;i< route.CalculatedRoute.Count - 1;i++)
                     {
                         Line line = new Line();
                         line.Stroke = Brushes.Red;
 
-                        line.X1 = route.ElementAt(i).X;
-                        line.X2 = route.ElementAt(i+1).X;
-                        line.Y1 = route.ElementAt(i).Y;
-                        line.Y2 = route.ElementAt(i+1).Y;
+                        line.X1 = route.CalculatedRoute.ElementAt(i).X;
+                        line.X2 = route.CalculatedRoute.ElementAt(i+1).X;
+                        line.Y1 = route.CalculatedRoute.ElementAt(i).Y;
+                        line.Y2 = route.CalculatedRoute.ElementAt(i+1).Y;
 
                         line.StrokeThickness = 2;
                         canvas.Children.Add(line);
@@ -80,13 +81,18 @@ namespace Algorytmika
                     Line line1 = new Line();
                     line1.Stroke = Brushes.Red;
 
-                    line1.X1 = route.ElementAt(0).X;
-                    line1.X2 = route.ElementAt(route.Count-1).X;
-                    line1.Y1 = route.ElementAt(0).Y;
-                    line1.Y2 = route.ElementAt(route.Count - 1).Y;
+                    line1.X1 = route.CalculatedRoute.ElementAt(0).X;
+                    line1.X2 = route.CalculatedRoute.ElementAt(route.CalculatedRoute.Count -1).X;
+                    line1.Y1 = route.CalculatedRoute.ElementAt(0).Y;
+                    line1.Y2 = route.CalculatedRoute.ElementAt(route.CalculatedRoute.Count - 1).Y;
 
                     line1.StrokeThickness = 2;
                     canvas.Children.Add(line1);
+
+                    //show info about route in UI
+                    profitL.Content = route.RouteProfit.ToString();
+                    pointsL.Content = route.CalculatedRoute.Count.ToString();
+                    lengthL.Content = route.Distance.ToString();
                 }
             }
             catch (Exception ex)

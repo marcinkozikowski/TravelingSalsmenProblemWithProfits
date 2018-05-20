@@ -72,7 +72,7 @@ namespace Algorytmika
             }
         }
 
-        public List<Node> GreedyRouteConstruction(double maxDistance)
+        public Route GreedyRouteConstruction(double maxDistance)
         {
             double distance = 0;
             double profit = 0;
@@ -85,8 +85,8 @@ namespace Algorytmika
             currentNode = startNode;
             while (distance < maxDistance)
             {
-                Node best = GetTheBestNode(currentNode,unvisited,distance,profit);
-                if (CheckDistance(distance,maxDistance,currentNode,best,startNode))
+                Node best = GetTheBestNode(currentNode,unvisited,distance,profit); //get whivh has the best overal profil to distance
+                if (CheckDistance(distance,maxDistance,currentNode,best,startNode)) //check wether route back to start is possible
                 {
                     distance = distance + NodeDistances[currentNode.Position, best.Position];
                     profit = profit + best.Profit;
@@ -100,7 +100,12 @@ namespace Algorytmika
                 }
             }
 
-            return route;
+            Route r = new Route();
+            r.CalculatedRoute = route;
+            r.Distance = distance;
+            r.RouteProfit = profit;
+
+            return r;
 
         }
 
@@ -226,6 +231,13 @@ namespace Algorytmika
 
             return nextSequence;
         }
+    }
+
+    class Route
+    {
+        public List<Node> CalculatedRoute { get; set; }
+        public double RouteProfit { get; set; }
+        public double Distance { get; set; }
     }
 
     class Node

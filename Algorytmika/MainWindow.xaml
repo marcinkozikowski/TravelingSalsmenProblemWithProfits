@@ -13,6 +13,11 @@
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
 
         <Menu Name="MainMenu" IsMainMenu="True" FontSize="16px" Height="auto" Margin="5">
             <Menu.Background>
@@ -42,7 +47,7 @@
             <MenuItem Header="Pomoc"/>
         </Menu>
 
-        <ScrollViewer Grid.Row="1" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="5">
+        <ScrollViewer Grid.Row="1" Grid.Column="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="5">
             <Border x:Name="CanvasBorder" BorderBrush="Black" BorderThickness="1">
 
                 <Canvas x:Name="canvas" Background="#00FFFFFF" Height="1100" Width="1100">
@@ -50,5 +55,31 @@
                 </Canvas>
             </Border>
         </ScrollViewer>
+        
+        <GroupBox Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Header="Trasa">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                
+                <Label Grid.Row="0" Grid.Column="0" Margin="5" Content="Profit: "/>
+                <Label Grid.Row="1" Grid.Column="0" Margin="5" Content="Długość: "/>
+                <Label Grid.Row="2" Grid.Column="0" Margin="5" Content="Ilość miast: "/>
+
+                <Label Grid.Row="0" Grid.Column="1" Margin="5" Name="profitL" Content="0" Foreground="Red" FontWeight="Bold"/>
+                <Label Grid.Row="1" Grid.Column="1" Margin="5" Name="lengthL" Content="0" FontWeight="Bold"/>
+                <Label Grid.Row="2" Grid.Column="1" Margin="5" Name="pointsL" Content="0" FontWeight="Bold"/>
+
+            </Grid>
+
+        </GroupBox>
     </Grid>
 </Window>
