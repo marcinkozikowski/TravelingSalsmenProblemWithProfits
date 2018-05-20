@@ -129,10 +129,11 @@ namespace Algorytmika
             double distance = 0;
             double profit = 0;
             List<Node> route = new List<Node>();    //construct route
-            List<Node> unvisited = NodesList;
+            List<Node> unvisited = new List<Node>(NodesList);
             route.Add(NodesList.ElementAt(0));      //add first point to route
             Node currentNode;
-            Node startNode = NodesList.ElementAt(0);
+            Node startNode = new Node();
+            startNode = NodesList.ElementAt(0);
             unvisited.Remove(startNode);
             currentNode = startNode;
 

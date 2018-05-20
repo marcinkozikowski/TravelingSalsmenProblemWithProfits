@@ -41,7 +41,7 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="Ścieżka">
-                <MenuItem Header="Dijkstry" />
+                <MenuItem Header="Optymalizacja 2-opt" Click="MenuItem_OnClick" />
                 <MenuItem Header="BFS"/>
             </MenuItem>
             <MenuItem Header="Pomoc"/>

@@ -21,11 +21,13 @@ namespace Algorytmika
     public partial class MainWindow : Window
     {
         private Algorithm alg;
+        private Route route;
 
         public MainWindow()
         {
             InitializeComponent();
             alg = new Algorithm();
+            route = new Route();
             CanvasBorder.BorderThickness = new Thickness(1);
             //alg.LoadData(@"D:\Studia\Algorytmika\Algorytmika\Algorytmika\test.txt");
          
@@ -40,7 +42,7 @@ namespace Algorytmika
             openFileDialog1.Filter = "txt files (*.txt)|*.txt";
             openFileDialog1.FilterIndex = 2;
             openFileDialog1.RestoreDirectory = true;
-            Route route = new Route();
+            
             try
             {
                 openFileDialog1.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
@@ -48,46 +50,10 @@ namespace Algorytmika
                 {
                     filePath = openFileDialog1.FileName;
                     alg.LoadData(filePath);
-                    var maxValueX = alg.NodesList.Max(w => w.X) + 2.5;
-                    var maxValueY = alg.NodesList.Max(w => w.Y) + 2.5;
-                    canvas.Height = maxValueY;
-                    canvas.Width = maxValueX;
-                    CanvasBorder.Width = maxValueX + 1;
-                    CanvasBorder.Height = maxValueY + 1;
-                    foreach (var node in alg.NodesList)
-                    {
-                        var ellipse = new Ellipse() { Width = 2.5, Height = 2.5, Stroke = new SolidColorBrush(Colors.Black) };
-                        Canvas.SetLeft(ellipse, node.X);
-                        Canvas.SetTop(ellipse, node.Y);
-                        canvas.Children.Add(ellipse);
-                    }
-                    
-                    //TODO make some method to draw calculated route 
+                    DrawPoints();
+
                     route = alg.GreedyRouteConstruction(7600);
-                    int a = route.CalculatedRoute.Count;
-                    for (int i=0;i< route.CalculatedRoute.Count - 1;i++)
-                    {
-                        Line line = new Line();
-                        line.Stroke = Brushes.Red;
-
-                        line.X1 = route.CalculatedRoute.ElementAt(i).X;
-                        line.X2 = route.CalculatedRoute.ElementAt(i+1).X;
-                        line.Y1 = route.CalculatedRoute.ElementAt(i).Y;
-                        line.Y2 = route.CalculatedRoute.ElementAt(i+1).Y;
-
-                        line.StrokeThickness = 2;
-                        canvas.Children.Add(line);
-                    }
-                    Line line1 = new Line();
-                    line1.Stroke = Brushes.Red;
-
-                    line1.X1 = route.CalculatedRoute.ElementAt(0).X;
-                    line1.X2 = route.CalculatedRoute.ElementAt(route.CalculatedRoute.Count -1).X;
-                    line1.Y1 = route.CalculatedRoute.ElementAt(0).Y;
-                    line1.Y2 = route.CalculatedRoute.ElementAt(route.CalculatedRoute.Count - 1).Y;
-
-                    line1.StrokeThickness = 2;
-                    canvas.Children.Add(line1);
+                    DrawRoute(route.CalculatedRoute);
 
                     //show info about route in UI
                     profitL.Content = route.RouteProfit.ToString();
@@ -100,12 +66,74 @@ namespace Algorytmika
             {
                 MessageBox.Show("Error: Nie można odczytać pliku z danymi: " + ex.Message,"Wczytywanie danych",MessageBoxButton.OK,MessageBoxImage.Error);
             }
-            List<Node> optimalized = alg.TwoOpt(route);
+        }
+
+        private void DrawPoints()
+        {
+            var maxValueX = alg.NodesList.Max(w => w.X) + 2.5;
+            var maxValueY = alg.NodesList.Max(w => w.Y) + 2.5;
+            canvas.Height = maxValueY;
+            canvas.Width = maxValueX;
+            CanvasBorder.Width = maxValueX + 1;
+            CanvasBorder.Height = maxValueY + 1;
+            foreach (var node in alg.NodesList)
+            {
+                var ellipse = new Ellipse() { Width = 2.5, Height = 2.5, Stroke = new SolidColorBrush(Colors.Black) };
+                Canvas.SetLeft(ellipse, node.X);
+                Canvas.SetTop(ellipse, node.Y);
+                canvas.Children.Add(ellipse);
+            }
+        }
+
+        private void DrawRoute(List<Node> routeView)
+        {
+            for (int i = 0; i < routeView.Count - 1; i++)
+            {
+                Line line = new Line();
+                line.Stroke = Brushes.Red;
+
+                line.X1 = routeView.ElementAt(i).X;
+                line.X2 = routeView.ElementAt(i + 1).X;
+                line.Y1 = routeView.ElementAt(i).Y;
+                line.Y2 = routeView.ElementAt(i + 1).Y;
+
+                line.StrokeThickness = 2;
+                canvas.Children.Add(line);
+            }
+            Line line1 = new Line();
+            line1.Stroke = Brushes.Red;
+
+            line1.X1 = routeView.ElementAt(0).X;
+            line1.X2 = routeView.ElementAt(routeView.Count - 1).X;
+            line1.Y1 = routeView.ElementAt(0).Y;
+            line1.Y2 = routeView.ElementAt(routeView.Count - 1).Y;
+
+            line1.StrokeThickness = 2;
+            canvas.Children.Add(line1);
         }
 
         private void ExitAppClick(object sender, RoutedEventArgs e)
         {
             System.Windows.Application.Current.Shutdown();
+        }
+
+        private void MenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (route.CalculatedRoute != null)
+            {
+                List<Node> optimalized = alg.TwoOpt(route);
+                double profit = 0;
+                foreach (var n in optimalized)
+                {
+                    profit = profit + n.Profit;
+                }
+
+                profitL.Content = profit.ToString();
+                canvas.Children.Clear();
+                DrawPoints();
+                DrawRoute(optimalized);
+            }
+
         }
     }
 }
