@@ -218,12 +218,12 @@ namespace Algorytmika
        public List<Node> TwoOpt(Route currentRoute)
         {
             List<Node> newRoute = new List<Node>();
-            List<Node> bestRoute = currentRoute.CalculatedRoute;
+            List<Node> bestRoute = new List<Node>(currentRoute.CalculatedRoute);
             int n = currentRoute.CalculatedRoute.Count;
             double newProfit = 0;
-            double bestProfit = currentRoute.RouteProfit;
             bool improve = true;
-            while (improve)
+            int count = 0;
+            while (count<20)
             {
                 improve = false;
                 for (int i = 1; i < n - 2; i++)
@@ -240,11 +240,14 @@ namespace Algorytmika
                         // if distance can be shortened, adjust the tour
                         if (d2 < d1)
                         {
-                            bestRoute = optSwap(bestRoute, i, k);
+                            newRoute = optSwap(bestRoute, i, k);
+                            bestRoute = newRoute;
                             improve = true;
                         }
                     }
                 }
+
+                count++;
             }
 
             return bestRoute;
@@ -262,7 +265,7 @@ namespace Algorytmika
             //1.take route[0] to route[i - 1] and add them in order to new_route
             for (int a = 0; a < i; a++)
             {
-                newRoute.Add(route.ElementAt(i));
+                newRoute.Add(route.ElementAt(a));
             }
             //2.take route[i] to route[k] and add them in reverse order to new_route
             for (int b = i; b < k + 1; b++)
@@ -277,11 +280,6 @@ namespace Algorytmika
             }
             //3.take route[k + 1] to end and add them in order to new_route
             return newRoute;
-        }
-
-        private void TwoOptSwap(int i, int k)
-        {
-
         }
 
         public static int[] TwoOptSwap(int[] sequence, int i, int k)

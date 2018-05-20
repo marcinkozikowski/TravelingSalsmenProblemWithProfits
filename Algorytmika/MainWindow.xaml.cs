@@ -121,14 +121,22 @@ namespace Algorytmika
         {
             if (route.CalculatedRoute != null)
             {
-                List<Node> optimalized = alg.TwoOpt(route);
+                List<Node> optimalized =new List<Node>(alg.TwoOpt(route));
                 double profit = 0;
+                double distance = 0;
                 foreach (var n in optimalized)
                 {
                     profit = profit + n.Profit;
                 }
 
+                for (int i = 0; i < optimalized.Count - 2;i++)
+                {
+                    distance = distance + alg.NodeDistances[i, i + 1];
+                }
+
                 profitL.Content = profit.ToString();
+                lengthL.Content = distance.ToString();
+                pointsL.Content = optimalized.ToString();
                 canvas.Children.Clear();
                 DrawPoints();
                 DrawRoute(optimalized);
