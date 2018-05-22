@@ -307,6 +307,47 @@ namespace Algorytmika
             return optiPath;
         }
 
+        public Route ConstructAnotherRoute(int maxDistance)
+        {
+            double distance = 0;
+            double profit = 0;
+            List<Node> route = new List<Node>();    //construct route
+            List<Node> unvisited = new List<Node>(UnvisitedNodesList);
+            route.Add(NodesList.ElementAt(0));      //add first point to route
+            Node currentNode;
+            Node startNode = new Node();
+            startNode = NodesList.ElementAt(0);
+            unvisited.Remove(startNode);
+            currentNode = startNode;
+
+            while (distance < maxDistance)
+            {
+                Node best = GetTheBestNode(currentNode, unvisited, distance, profit); //get whivh has the best overal profil to distance
+                if (CheckDistance(distance, maxDistance, currentNode, best, startNode)) //check wether route back to start is possible
+                {
+                    distance = distance + NodeDistances[currentNode.Position, best.Position];
+                    profit = profit + best.Profit;
+                    route.Add(best);
+                    unvisited.Remove(best);
+                    currentNode = best;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            UnvisitedNodesList = unvisited;
+            Route r = new Route();
+            r.CalculatedRoute = route;
+            r.Distance = distance;
+            r.RouteProfit = profit;
+
+            r = TwoOpt(r);
+            r = Insert(r, 7600);
+
+            return r;
+        }
+
         private List<Node> ConstructNewPath(int insertIdx,Node insertNode, List<Node> currentPath)
         {
             List<Node> newPath = new List<Node>();

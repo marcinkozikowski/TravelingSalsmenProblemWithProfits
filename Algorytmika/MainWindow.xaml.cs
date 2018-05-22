@@ -53,7 +53,7 @@ namespace Algorytmika
                     DrawPoints();
 
                     route = alg.GreedyRouteConstruction(7600);
-                    DrawRoute(route.CalculatedRoute);
+                    DrawRoute(route.CalculatedRoute,Brushes.Red);
 
                     //show info about route in UI
                     profitL.Content = route.RouteProfit.ToString();
@@ -85,12 +85,12 @@ namespace Algorytmika
             }
         }
 
-        private void DrawRoute(List<Node> routeView)
+        private void DrawRoute(List<Node> routeView,Brush color)
         {
             for (int i = 0; i < routeView.Count - 1; i++)
             {
                 Line line = new Line();
-                line.Stroke = Brushes.Red;
+                line.Stroke = color;
 
                 line.X1 = routeView.ElementAt(i).X;
                 line.X2 = routeView.ElementAt(i + 1).X;
@@ -101,7 +101,7 @@ namespace Algorytmika
                 canvas.Children.Add(line);
             }
             Line line1 = new Line();
-            line1.Stroke = Brushes.Red;
+            line1.Stroke = color;
 
             line1.X1 = routeView.ElementAt(0).X;
             line1.X2 = routeView.ElementAt(routeView.Count - 1).X;
@@ -138,7 +138,13 @@ namespace Algorytmika
                 pointsL.Content = a.CalculatedRoute.Count();
                 canvas.Children.Clear();
                 DrawPoints();
-                DrawRoute(a.CalculatedRoute);
+                DrawRoute(a.CalculatedRoute,Brushes.Red);
+
+                Route ab = alg.ConstructAnotherRoute(7600);
+
+
+                DrawRoute(ab.CalculatedRoute, Brushes.Blue);
+
             }
 
         }
