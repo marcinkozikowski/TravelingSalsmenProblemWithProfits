@@ -224,7 +224,7 @@ namespace Algorytmika
             double bestDist = currentRoute.Distance;
             bool improve = true;
             int count = 0;
-            while (count<20)
+            while (count<300)
             {
                 improve = false;
                 for (int i = 1; i < n - 2; i++)
@@ -236,8 +236,7 @@ namespace Algorytmika
                         //    NodeDistances[bestRoute.ElementAt(k).Position, bestRoute.ElementAt(k + 1).Position];
 
                         //double d2 = NodeDistances[bestRoute.ElementAt(i).Position, bestRoute.ElementAt(k).Position] +
-                        //            NodeDistances[bestRoute.ElementAt(i+1).Position, bestRoute.ElementAt(k + 1).Position];
-
+                        //            NodeDistances[bestRoute.ElementAt(i + 1).Position, bestRoute.ElementAt(k + 1).Position];
                         newRoute = optSwap(bestRoute, i, k);
                         newDist = CalcDistance(newRoute);
                         if (newDist < bestDist)
@@ -270,7 +269,7 @@ namespace Algorytmika
             double dist = 0;
             for (int i = 0; i < route.Count - 2; i++)
             {
-                dist = dist + NodeDistances[i, i + 1];
+                dist = dist + NodeDistances[route.ElementAt(i).Position, route.ElementAt(i + 1).Position];
             }
             return dist;
         }
