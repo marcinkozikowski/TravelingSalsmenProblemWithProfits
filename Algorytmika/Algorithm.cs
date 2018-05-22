@@ -20,6 +20,7 @@ namespace Algorytmika
         private double Dmax { get; set; } // maksymalna trasa w km
 
         public List<Node> NodesList { get; set; } // lista wszystkich punktow
+        public List<Node> UnvisitedNodesList { get; set; } // lista wszystkich punktow
         public List<Tuple<Node, Node>> Connections = new List<Tuple<Node, Node>>();
 
         public double[,] NodeDistances { get; set; } // tablica dystansow.
@@ -154,6 +155,7 @@ namespace Algorytmika
                 }
             }
 
+            UnvisitedNodesList = unvisited;
             Route r = new Route();
             r.CalculatedRoute = route;
             r.Distance = distance;
@@ -224,7 +226,7 @@ namespace Algorytmika
             double bestDist = currentRoute.Distance;
             bool improve = true;
             int count = 0;
-            while (count<300)
+            while (improve)
             {
                 improve = false;
                 for (int i = 1; i < n - 2; i++)
@@ -260,8 +262,67 @@ namespace Algorytmika
             Route r = new Route();
             r.CalculatedRoute = bestRoute;
             r.Distance = bestDist;
+            r.RouteProfit = CalcProfit(bestRoute);
             return r;
 
+        }
+
+        public Route Insert(Route currentRoute, int max)
+        {
+            Route optiPath = new Route();
+            int n = currentRoute.CalculatedRoute.Count;
+            List<Node> tempPath = new List<Node>();
+            List<Node> currentPath = new List<Node>(currentRoute.CalculatedRoute);
+            double profit = currentRoute.RouteProfit;
+            double tempProfit = 0;
+            double tempDistance = 0;
+            bool improve = true;
+            int count = 0;
+
+            while (improve)
+            {
+                improve = false;
+                for (int v = 0; v < UnvisitedNodesList.Count; v++)
+                {
+                    for (int i = 1; i < n - 1; i++)
+                    {
+                        tempPath = ConstructNewPath(i, UnvisitedNodesList.ElementAt(v), currentPath);
+                        tempProfit = CalcProfit(tempPath);
+                        tempDistance = CalcDistance(tempPath);
+                        if ((tempProfit > profit) && (tempDistance <= max))
+                        {
+                            currentPath = tempPath;
+                            profit = tempProfit;
+                            improve = true;
+                            UnvisitedNodesList.RemoveAt(v);
+
+                        }
+                    }
+                }
+                count++;
+            }
+            optiPath.RouteProfit = profit;
+            optiPath.Distance = CalcDistance(currentPath);
+            optiPath.CalculatedRoute = currentPath;
+            return optiPath;
+        }
+
+        private List<Node> ConstructNewPath(int insertIdx,Node insertNode, List<Node> currentPath)
+        {
+            List<Node> newPath = new List<Node>();
+
+            //add first half of current path
+            for(int i=0;i<insertIdx;i++)
+            {
+                newPath.Add(currentPath.ElementAt(i));
+            }
+            //add node to list on insert index
+            newPath.Add(insertNode);
+            for(int i=insertIdx;i<currentPath.Count;i++)
+            {
+                newPath.Add(currentPath.ElementAt(i));
+            }
+            return newPath;
         }
 
         private double CalcDistance(List<Node> route)
@@ -270,6 +331,16 @@ namespace Algorytmika
             for (int i = 0; i < route.Count - 2; i++)
             {
                 dist = dist + NodeDistances[route.ElementAt(i).Position, route.ElementAt(i + 1).Position];
+            }
+            return dist;
+        }
+
+        private double CalcProfit(List<Node> route)
+        {
+            double dist = 0;
+            foreach (var n in route)
+            {
+                dist = dist + n.Profit;
             }
             return dist;
         }

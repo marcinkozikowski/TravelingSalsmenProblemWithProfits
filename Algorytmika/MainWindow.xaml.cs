@@ -130,14 +130,15 @@ namespace Algorytmika
                     profit = profit + n.Profit;
                 }
 
-              
 
-                profitL.Content = profit.ToString();
-                lengthL.Content = o.Distance.ToString();
-                pointsL.Content = optimalized.Count.ToString();
+               Route a = alg.Insert(o,7600);
+
+                profitL.Content = a.RouteProfit.ToString();
+                lengthL.Content = a.Distance.ToString();
+                pointsL.Content = a.CalculatedRoute.Count();
                 canvas.Children.Clear();
                 DrawPoints();
-                DrawRoute(optimalized);
+                DrawRoute(a.CalculatedRoute);
             }
 
         }
