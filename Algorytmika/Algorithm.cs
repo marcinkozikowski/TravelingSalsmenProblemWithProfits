@@ -32,7 +32,8 @@ namespace Algorytmika
         private int numberOfNodes;
 
         public void LoadData(string path)
-        { 
+        {
+            randomlyFlag = 0;
             if(NodesList!=null)
             {
                 NodesList.Clear();
@@ -52,8 +53,6 @@ namespace Algorytmika
                         NodesList.Add(new Node
                         {
                             Position = inc++,
-                         //   X = Convert.ToDouble(data[0].Replace('.',',')),
-                         //   Y = Convert.ToDouble(data[1].Replace('.', ',')),
                             X = Double.Parse(data[0], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture),
                             Y = Double.Parse(data[1], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture),
                             Profit = Convert.ToDouble(data[2]),
@@ -63,6 +62,7 @@ namespace Algorytmika
                 } while (line != null);
             }
             calcDistances();
+            UnvisitedNodesList = new List<Node>(NodesList);
         }
 
         private void calcDistances()
