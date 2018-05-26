@@ -48,18 +48,10 @@ namespace Algorytmika
                 openFileDialog1.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 if (openFileDialog1.ShowDialog() == true)
                 {
+                    canvas.Children.Clear();
                     filePath = openFileDialog1.FileName;
                     alg.LoadData(filePath);
                     DrawPoints();
-
-                    route = alg.GreedyRouteConstruction(7600);
-                    DrawRoute(route.CalculatedRoute,Brushes.Red);
-
-                    //show info about route in UI
-                    profitL.Content = route.RouteProfit.ToString();
-                    pointsL.Content = route.CalculatedRoute.Count.ToString();
-                    lengthL.Content = route.Distance.ToString();
-
                 }
             }
             catch (Exception ex)
@@ -119,34 +111,74 @@ namespace Algorytmika
 
         private void MenuItem_OnClick(object sender, RoutedEventArgs e)
         {
-            if (route.CalculatedRoute != null)
+                canvas.Children.Clear();
+                DrawPoints();
+                route = alg.GreedyRouteConstruction(7600);
+                DrawRoute(route.CalculatedRoute, Brushes.Red);
+                profitL.Content = route.RouteProfit.ToString();
+                pointsL.Content = route.CalculatedRoute.Count.ToString();
+                lengthL.Content = route.Distance.ToString();
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+                canvas.Children.Clear();
+                DrawPoints();
+                route = alg.GreedyRandomlyRouteConstruction(7600);
+                DrawRoute(route.CalculatedRoute, Brushes.Red);
+                //show info about route in UI
+                profitL.Content = route.RouteProfit.ToString();
+                pointsL.Content = route.CalculatedRoute.Count.ToString();
+                lengthL.Content = route.Distance.ToString();
+        }
+
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (route != null)
             {
-                Route o = alg.TwoOpt(route);
-                List<Node> optimalized =new List<Node>(o.CalculatedRoute);
-                double profit = 0;
-                double distance = 0;
-                foreach (var n in optimalized)
-                {
-                    profit = profit + n.Profit;
-                }
-
-
-               Route a = alg.Insert(o,7600);
-
+                canvas.Children.Clear();
+                DrawPoints();
+                Route a = alg.Insert(route, 7600);
                 profitL.Content = a.RouteProfit.ToString();
                 lengthL.Content = a.Distance.ToString();
                 pointsL.Content = a.CalculatedRoute.Count();
                 canvas.Children.Clear();
                 DrawPoints();
-                DrawRoute(a.CalculatedRoute,Brushes.Red);
-
-                Route ab = alg.ConstructAnotherRoute(7600);
-
-
-                DrawRoute(ab.CalculatedRoute, Brushes.Blue);
-
+                DrawRoute(a.CalculatedRoute, Brushes.Red);
             }
+        }
 
+        private void MenuItem_Click_2(object sender, RoutedEventArgs e)
+        {
+            if (route != null)
+            {
+                canvas.Children.Clear();
+                DrawPoints();
+                route = alg.TwoOpt(route);
+                //List<Node> optimalized = new List<Node>(o.CalculatedRoute);
+                //double profit = 0;
+                //double distance = 0;
+                //foreach (var n in optimalized)
+                //{
+                //    profit = profit + n.Profit;
+                //}
+                profitL.Content = route.RouteProfit.ToString();
+                lengthL.Content = route.Distance.ToString();
+                pointsL.Content = route.CalculatedRoute.Count();
+                DrawRoute(route.CalculatedRoute, Brushes.Red);
+            }
+        }
+
+        private void MenuItem_Click_3(object sender, RoutedEventArgs e)
+        {
+            if (route != null)
+            {
+                Route temp = alg.ConstructAnotherRoute(7600);
+                profitL.Content = temp.RouteProfit.ToString();
+                lengthL.Content = temp.Distance.ToString();
+                pointsL.Content = temp.CalculatedRoute.Count();
+                DrawRoute(temp.CalculatedRoute, Brushes.Blue);
+            }
         }
     }
 }

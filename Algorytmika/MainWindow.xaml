@@ -40,10 +40,18 @@
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="Ścieżka">
-                <MenuItem Header="Optymalizacja 2-opt" Click="MenuItem_OnClick" />
-                <MenuItem Header="BFS"/>
+            <MenuItem Header="Konstrukcja Ścieżki">
+                <MenuItem Header="Zachłanna" Click="MenuItem_OnClick" />
+                <MenuItem Header="Zachłanno-losowa" Click="MenuItem_Click"/>
             </MenuItem>
+            <MenuItem Header="Optymalizacja Ścieżki">
+                <MenuItem Header="Optymalizacja 2-opt" Click="MenuItem_Click_2" />
+                <MenuItem Header="Optymalizacja 2-opt INSERT" Click="MenuItem_Click_1"/>
+            </MenuItem>
+            <MenuItem Header="Kolejna trasa">
+                <MenuItem Header="Wyznacz kolejną trasę" Click="MenuItem_Click_3" />
+            </MenuItem>
+
             <MenuItem Header="Pomoc"/>
         </Menu>
 

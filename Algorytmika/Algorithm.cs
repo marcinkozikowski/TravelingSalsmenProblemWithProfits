@@ -19,6 +19,8 @@ namespace Algorytmika
 
         private double Dmax { get; set; } // maksymalna trasa w km
 
+        private int randomlyFlag = 0;
+
         public List<Node> NodesList { get; set; } // lista wszystkich punktow
         public List<Node> UnvisitedNodesList { get; set; } // lista wszystkich punktow
         public List<Tuple<Node, Node>> Connections = new List<Tuple<Node, Node>>();
@@ -31,6 +33,10 @@ namespace Algorytmika
 
         public void LoadData(string path)
         { 
+            if(NodesList!=null)
+            {
+                NodesList.Clear();
+            }
             NodesList = new List<Node>();
             using (StreamReader stream = new StreamReader(path))
             {
@@ -165,6 +171,90 @@ namespace Algorytmika
 
         }
 
+        public Route GreedyRandomlyRouteConstruction(double maxDistance)
+        {
+            double distance = 0;
+            double profit = 0;
+            List<Node> route = new List<Node>();    //construct route
+            List<Node> unvisited = new List<Node>(NodesList);
+            route.Add(NodesList.ElementAt(0));      //add first point to route
+            Node currentNode;
+            Node startNode = new Node();
+            startNode = NodesList.ElementAt(0);
+            unvisited.Remove(startNode);
+            currentNode = startNode;
+
+            while (distance < maxDistance)
+            {
+                Node best = GetTheBestNodeWithRandomly(currentNode, unvisited, distance, profit); //get whivh has the best overal profil to distance
+                if (CheckDistance(distance, maxDistance, currentNode, best, startNode)) //check wether route back to start is possible
+                {
+                    distance = distance + NodeDistances[currentNode.Position, best.Position];
+                    profit = profit + best.Profit;
+                    route.Add(best);
+                    unvisited.Remove(best);
+                    currentNode = best;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            UnvisitedNodesList = unvisited;
+            Route r = new Route();
+            r.CalculatedRoute = route;
+            r.Distance = distance;
+            r.RouteProfit = profit;
+
+            return r;
+
+        }
+
+        private Node GetTheBestNodeWithRandomly(Node current, List<Node> unvistedNodes, double distance, double profit)
+        {
+            Node best = new Node();
+            double bestProfit = 0;
+
+            foreach (var n in unvistedNodes)
+            {
+                if (current != n)
+                {
+                    if (randomlyFlag == 17)
+                    {
+                        best = GetShortestWayNode(current, unvistedNodes);
+                        break;
+                    }
+                    else
+                    {
+                        if ((n.Profit + profit) / (NodeDistances[current.Position, n.Position] + distance) > bestProfit)
+                        {
+                            best = n;
+                            bestProfit = (n.Profit + profit) / (NodeDistances[current.Position, n.Position] + distance);
+                            randomlyFlag++;
+                        }
+                    }
+                }
+            }
+
+            return best;
+        }
+
+        private Node GetShortestWayNode(Node current, List<Node> unvisitedNodes)
+        {
+            double bestDist = double.MaxValue;
+            Node best = new Node();
+            foreach(var n in unvisitedNodes)
+            {
+                if(NodeDistances[current.Position, n.Position] < bestDist)
+                {
+                    best = n;
+                    bestDist = NodeDistances[current.Position, n.Position];
+                }
+            }
+            return best;     
+        }
+
         private bool CheckDistance(double currentDistance, double maxDistance, Node current, Node next,Node start)
         {
             if (NodeDistances[current.Position, next.Position] + currentDistance < maxDistance)
@@ -225,40 +315,24 @@ namespace Algorytmika
             double newDist = 0;
             double bestDist = currentRoute.Distance;
             bool improve = true;
-            int count = 0;
-            while (improve)
-            {
-                improve = false;
-                for (int i = 1; i < n - 2; i++)
+                while (improve)
                 {
-                    for (int k = i + 1; k < n-1; k++)
+                    improve = false;
+                    for (int i = 1; i < n - 2; i++)
                     {
-                        //double d1 =
-                        //    NodeDistances[bestRoute.ElementAt(i).Position, bestRoute.ElementAt(i + 1).Position] +
-                        //    NodeDistances[bestRoute.ElementAt(k).Position, bestRoute.ElementAt(k + 1).Position];
-
-                        //double d2 = NodeDistances[bestRoute.ElementAt(i).Position, bestRoute.ElementAt(k).Position] +
-                        //            NodeDistances[bestRoute.ElementAt(i + 1).Position, bestRoute.ElementAt(k + 1).Position];
-                        newRoute = optSwap(bestRoute, i, k);
-                        newDist = CalcDistance(newRoute);
-                        if (newDist < bestDist)
+                        for (int k = i + 1; k < n - 1; k++)
                         {
-                            bestRoute = newRoute;
-                            bestDist = newDist;
-                            improve = true;
+                            newRoute = optSwap(bestRoute, i, k);
+                            newDist = CalcDistance(newRoute);
+                            if (newDist < bestDist)
+                            {
+                                bestRoute = newRoute;
+                                bestDist = newDist;
+                                improve = true;
+                            }
                         }
-                        //// if distance can be shortened, adjust the tour
-                        //if (d2 < d1)
-                        //{
-                        //    newRoute = optSwap(bestRoute, i, k);
-                        //    bestRoute = newRoute;
-                        //    improve = true;
-                        //}
                     }
                 }
-
-                count++;
-            }
             Route r = new Route();
             r.CalculatedRoute = bestRoute;
             r.Distance = bestDist;
@@ -282,7 +356,7 @@ namespace Algorytmika
             while (improve)
             {
                 improve = false;
-                for (int v = 0; v < UnvisitedNodesList.Count; v++)
+                for (int v = 0; v < UnvisitedNodesList.Count-1; v++)
                 {
                     for (int i = 1; i < n - 1; i++)
                     {
