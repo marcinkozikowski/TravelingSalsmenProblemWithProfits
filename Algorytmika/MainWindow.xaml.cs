@@ -70,7 +70,8 @@ namespace Algorytmika
             CanvasBorder.Height = maxValueY + 1;
             foreach (var node in alg.NodesList)
             {
-                var ellipse = new Ellipse() { Width = 2.5, Height = 2.5, Stroke = new SolidColorBrush(Colors.Black) };
+                var ellipse = new Ellipse() { Width = 4, Height = 4, Stroke = new SolidColorBrush(Colors.Black) };
+                ellipse.ToolTip = "Pozycja: "+node.Position +"\nProfit: "+node.Profit+"\nX: "+ node.X + "\nY: " + node.Y;
                 Canvas.SetLeft(ellipse, node.X);
                 Canvas.SetTop(ellipse, node.Y);
                 canvas.Children.Add(ellipse);
