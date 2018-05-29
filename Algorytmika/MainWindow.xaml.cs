@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Maps.MapControl.WPF;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,6 +27,7 @@ namespace Algorytmika
         private Double zoomMin = 0.5;
         private Double zoomSpeed = 0.001;
         private Double zoom = 1;
+        private bool what = false;  //if true then draw poin on canvas if false show on map
 
         public MainWindow()
         {
@@ -54,9 +56,24 @@ namespace Algorytmika
                 {
                     canvas.Children.Clear();
                     filePath = openFileDialog1.FileName;
-                    alg.LoadData(filePath);
-                    DrawPoints();
+                    bool what = alg.LoadData(filePath);
+                    if (what)
+                    {
+                        scroll.Visibility = Visibility.Visible;
+                        bingMap.Visibility = Visibility.Collapsed;
+                        DrawPoints();
+                    }
+                    else if(!what)
+                    {
+                        scroll.Visibility = Visibility.Collapsed;
+                        bingMap.Visibility = Visibility.Visible;
+                        DrawPinsOnBingMap();
+                    }
                 }
+                //clear labels when new file loaded
+                profitL.Content = "";
+                lengthL.Content = "";
+                pointsL.Content = "";
             }
             catch (Exception ex)
             {
@@ -66,6 +83,7 @@ namespace Algorytmika
 
         private void DrawPoints()
         {
+            
             var maxValueX = alg.NodesList.Max(w => w.X) + 2.5;
             var maxValueY = alg.NodesList.Max(w => w.Y) + 2.5;
             canvas.Height = maxValueY;
@@ -80,6 +98,21 @@ namespace Algorytmika
                 Canvas.SetTop(ellipse, node.Y);
                 canvas.Children.Add(ellipse);
             }
+        }
+
+        private void DrawPinsOnBingMap()
+        {
+            foreach (var node in alg.NodesList)
+            {
+                // The pushpin to add to the map.
+                Pushpin pin = new Pushpin();
+                pin.Location = new Location(node.Y,node.X);
+                pin.ToolTip = "Pozycja: " + node.Position + "\nProfit: " + node.Profit + "\nX: " + node.X + "\nY: " + node.Y;
+                // Adds the pushpin to the map.
+                bingMap.Children.Add(pin);
+
+            }
+
         }
 
         private void DrawRoute(List<Node> routeView,Brush color)

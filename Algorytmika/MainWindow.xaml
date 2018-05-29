@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:m="clr-namespace:Microsoft.Maps.MapControl.WPF;assembly=Microsoft.Maps.MapControl.WPF"
         xmlns:local="clr-namespace:Algorytmika"
         Icon="Icons\chart.ico"
         mc:Ignorable="d"
@@ -56,7 +57,7 @@
         </Menu>
 
         
-        <ScrollViewer Grid.Row="1" Grid.Column="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="5">
+        <ScrollViewer Name="scroll" Visibility="Collapsed" Grid.Row="1" Grid.Column="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="5">
             <Border x:Name="CanvasBorder" BorderBrush="Black" BorderThickness="1">
 
                 <Canvas x:Name="canvas" Background="#00FFFFFF" Height="1100" Width="1100" MouseWheel="canvas_MouseWheel">
@@ -64,6 +65,8 @@
                 </Canvas>
             </Border>
         </ScrollViewer>
+
+        <m:Map Grid.Row="1" Name="bingMap" CredentialsProvider="AjDiz9UIPwqjiEWzQHZCPK0Nw2zBzRqBB9S5iGFMnL1-MYmB-xEx3eg3hacOKS-I"/>
 
         <Slider Grid.Row="2" Minimum="0.5" Maximum="5" Name="zoomSlider" Value="0" ValueChanged="zoomSlider_ValueChanged"/>
 

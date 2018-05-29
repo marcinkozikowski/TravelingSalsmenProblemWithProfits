@@ -33,7 +33,7 @@ namespace Algorytmika
 
         private int numberOfPaths;
 
-        public void LoadData(string path)
+        public bool LoadData(string path)
         {
             randomlyFlag = 0;
             if(NodesList!=null)
@@ -48,10 +48,12 @@ namespace Algorytmika
             {
                 LoadTestData(path);
                 calcDistances();
+                return true;
             }
             else
             {
                 LoadPolishRoadData(path);
+                return false;
             }
             UnvisitedNodesList = new List<Node>(NodesList);
         }
@@ -72,8 +74,8 @@ namespace Algorytmika
                 {
                     Position = Convert.ToInt32(line[0])-1,
                     Profit = Convert.ToInt32(line[1]),
-                    X = Convert.ToDouble(line[2])*10,
-                    Y = Convert.ToDouble(line[3])*10
+                    X = Convert.ToDouble(line[2]),
+                    Y = Convert.ToDouble(line[3])
                 });
             }
             UnvisitedNodesList = new List<Node>(NodesList);
@@ -377,9 +379,9 @@ namespace Algorytmika
                 while (improve)
                 {
                     improve = false;
-                    for (int i = 1; i < n - 2; i++)
+                    for (int i = 1; i < n - 1; i++)
                     {
-                        for (int k = i + 1; k < n - 1; k++)
+                        for (int k = i + 1; k < n - 0; k++)
                         {
                             newRoute = optSwap(bestRoute, i, k);
                             newDist = CalcDistance(newRoute);
