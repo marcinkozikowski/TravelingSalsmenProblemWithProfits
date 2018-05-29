@@ -70,16 +70,31 @@ namespace Algorytmika
                 string[] line = streamCheck.ReadLine().Split(' ');
                 NodesList.Add(new Node
                 {
-                    Position = Convert.ToInt32(line[0]),
+                    Position = Convert.ToInt32(line[0])-1,
                     Profit = Convert.ToInt32(line[1]),
                     X = Convert.ToDouble(line[2])*10,
                     Y = Convert.ToDouble(line[3])*10
                 });
             }
-            //wczytywanie dystansow miedzy miastami
-
-            
             UnvisitedNodesList = new List<Node>(NodesList);
+            //wczytywanie dystansow miedzy miastami
+            NodeDistances = new double[NodesList.Count, NodesList.Count];
+            try
+            {
+                for (int i = 0; i < numberOfPaths; i++)
+                {
+                    string[] line = streamCheck.ReadLine().Split(' ');
+                    int from = Convert.ToInt32(line[0]);
+                    int to = Convert.ToInt32(line[1]);
+                    int distance = Convert.ToInt32(line[2]);
+                    NodeDistances[from - 1, to - 1] = distance;
+                    NodeDistances[to - 1, from - 1] = distance;
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
 
         public void LoadTestData(string path)
