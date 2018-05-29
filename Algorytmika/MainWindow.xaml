@@ -55,15 +55,18 @@
             <MenuItem Header="Pomoc"/>
         </Menu>
 
+        
         <ScrollViewer Grid.Row="1" Grid.Column="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="5">
             <Border x:Name="CanvasBorder" BorderBrush="Black" BorderThickness="1">
 
-                <Canvas x:Name="canvas" Background="#00FFFFFF" Height="1100" Width="1100">
+                <Canvas x:Name="canvas" Background="#00FFFFFF" Height="1100" Width="1100" MouseWheel="canvas_MouseWheel">
 
                 </Canvas>
             </Border>
         </ScrollViewer>
-        
+
+        <Slider Grid.Row="2" Minimum="0.5" Maximum="5" Name="zoomSlider" Value="0" ValueChanged="zoomSlider_ValueChanged"/>
+
         <GroupBox Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Header="Trasa">
             <Grid>
                 <Grid.RowDefinitions>

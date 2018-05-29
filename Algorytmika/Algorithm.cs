@@ -31,6 +31,8 @@ namespace Algorytmika
 
         private int numberOfNodes;
 
+        private int numberOfPaths;
+
         public void LoadData(string path)
         {
             randomlyFlag = 0;
@@ -39,6 +41,49 @@ namespace Algorytmika
                 NodesList.Clear();
             }
             NodesList = new List<Node>();
+            StreamReader streamCheck = new StreamReader(path);
+            string[] lineCheck = streamCheck.ReadLine().Split(' ');
+            streamCheck.Close();
+            if (lineCheck.Length < 2)
+            {
+                LoadTestData(path);
+                calcDistances();
+            }
+            else
+            {
+                LoadPolishRoadData(path);
+            }
+            UnvisitedNodesList = new List<Node>(NodesList);
+        }
+
+        public void LoadPolishRoadData(string path)
+        {
+            StreamReader streamCheck = new StreamReader(path);
+            string[] lineCheck = streamCheck.ReadLine().Split(' ');
+
+            numberOfNodes = Convert.ToInt32(lineCheck[0]);
+            numberOfPaths = Convert.ToInt32(lineCheck[1]);
+
+            //wczytywanie miast profitow i pozycji geograficznej
+            for(int i=0;i<numberOfNodes;i++)
+            {
+                string[] line = streamCheck.ReadLine().Split(' ');
+                NodesList.Add(new Node
+                {
+                    Position = Convert.ToInt32(line[0]),
+                    Profit = Convert.ToInt32(line[1]),
+                    X = Convert.ToDouble(line[2])*10,
+                    Y = Convert.ToDouble(line[3])*10
+                });
+            }
+            //wczytywanie dystansow miedzy miastami
+
+            
+            UnvisitedNodesList = new List<Node>(NodesList);
+        }
+
+        public void LoadTestData(string path)
+        {
             using (StreamReader stream = new StreamReader(path))
             {
                 numberOfNodes = Convert.ToInt32(stream.ReadLine());
@@ -62,7 +107,6 @@ namespace Algorytmika
                 } while (line != null);
             }
             calcDistances();
-            UnvisitedNodesList = new List<Node>(NodesList);
         }
 
         private void calcDistances()

@@ -22,6 +22,10 @@ namespace Algorytmika
     {
         private Algorithm alg;
         private Route route;
+        private Double zoomMax = 5;
+        private Double zoomMin = 0.5;
+        private Double zoomSpeed = 0.001;
+        private Double zoom = 1;
 
         public MainWindow()
         {
@@ -66,8 +70,8 @@ namespace Algorytmika
             var maxValueY = alg.NodesList.Max(w => w.Y) + 2.5;
             canvas.Height = maxValueY;
             canvas.Width = maxValueX;
-            CanvasBorder.Width = maxValueX + 1;
-            CanvasBorder.Height = maxValueY + 1;
+            //CanvasBorder.Width = maxValueX + 1;
+            //CanvasBorder.Height = maxValueY + 1;
             foreach (var node in alg.NodesList)
             {
                 var ellipse = new Ellipse() { Width = 4, Height = 4, Stroke = new SolidColorBrush(Colors.Black) };
@@ -179,6 +183,41 @@ namespace Algorytmika
                 lengthL.Content = temp.Distance.ToString();
                 pointsL.Content = temp.CalculatedRoute.Count();
                 DrawRoute(temp.CalculatedRoute, Brushes.Blue);
+            }
+        }
+
+        private void canvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            zoom += zoomSpeed * e.Delta; // Ajust zooming speed (e.Delta = Mouse spin value )
+            if (zoom < zoomMin) { zoom = zoomMin; } // Limit Min Scale
+            if (zoom > zoomMax) { zoom = zoomMax; } // Limit Max Scale
+
+            Point mousePos = e.GetPosition(canvas);
+
+            if (zoom > 1)
+            {
+                canvas.RenderTransform = new ScaleTransform(zoom, zoom, mousePos.X, mousePos.Y); // transform Canvas size from mouse position
+            }
+            else
+            {
+                canvas.RenderTransform = new ScaleTransform(zoom, zoom); // transform Canvas size
+            }
+        }
+
+        private void zoomSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            zoom = zoomSlider.Value;
+
+            if (zoom < zoomMin) { zoom = zoomMin; } // Limit Min Scale
+            if (zoom > zoomMax) { zoom = zoomMax; } // Limit Max Scale
+
+            if (zoom > 1)
+            {
+                canvas.RenderTransform = new ScaleTransform(zoom, zoom); // transform Canvas size from mouse position
+            }
+            else
+            {
+                canvas.RenderTransform = new ScaleTransform(zoom, zoom); // transform Canvas size
             }
         }
     }
