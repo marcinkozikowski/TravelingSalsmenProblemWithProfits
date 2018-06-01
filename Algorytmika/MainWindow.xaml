@@ -48,6 +48,8 @@
             <MenuItem Header="Optymalizacja Ścieżki">
                 <MenuItem Header="Optymalizacja 2-opt" Click="MenuItem_Click_2" />
                 <MenuItem Header="Optymalizacja 2-opt INSERT" Click="MenuItem_Click_1"/>
+                <MenuItem Header="LocalSearch" Click="MenuItem_Click_4" />
+                <MenuItem Header="Greedy + LocalSearch N" Click="MenuItem_Click_5" />
             </MenuItem>
             <MenuItem Header="Kolejna trasa">
                 <MenuItem Header="Wyznacz kolejną trasę" Click="MenuItem_Click_3" />

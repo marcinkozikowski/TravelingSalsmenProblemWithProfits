@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Algorytmika
 {
@@ -15,7 +16,7 @@ namespace Algorytmika
         public const int INF = 1000000;
         public long[,] Graph { get; set; }
         private int[] Path;
-        int[] dist;
+        double[] dist;
         int[] prev;
         int[] visited;
         private Queue<int> distaneQueue;
@@ -25,16 +26,7 @@ namespace Algorytmika
         {
             list = _list;
             int size = list.Length;
-            dist = new int[size];
-            prev = new int[size];
-            visited = new int[size];
-        }
-
-        public Dijkstry(long[,] graph)
-        {
-            Graph = graph;
-            long size = graph.Length;
-            dist = new int[size];
+            dist = new double[size];
             prev = new int[size];
             visited = new int[size];
         }
@@ -60,61 +52,24 @@ namespace Algorytmika
                     break;
                 }
                 visited[smallestNode] = VISITED;
-                foreach (Node n in list[smallestNode])
+                foreach (NodeD n in list[smallestNode])
                 {
-                    if (dist[n.Position] > (dist[smallestNode] + getPathCost(smallestNode, n.Position)))
+                    if (dist[n.Index] > (dist[smallestNode] + getPathCost(smallestNode, n.Index)))
                     {
-                        dist[n.Position] = dist[smallestNode] + getPathCost(smallestNode, n.Position);
-                        prev[n.Position] = smallestNode;
+                        dist[n.Index] = dist[smallestNode] + getPathCost(smallestNode, n.Index);
+                        prev[n.Index] = smallestNode;
                     }
                 }
             }
-            Path = ReconstructPath(prev, SRC, DEST);
-            return Path;
-        }
-
-        public int[] GetPathMatrix(int SRC, int DEST)
-        {
-            int graphSize = Graph.GetLength(0);
-            int[] nodes = new int[dist.Length];
-
-            for (int i = 0; i < dist.Length; i++)
+            int[] tempPath = ReconstructPath(prev, SRC, DEST);
+            if (tempPath != null)
             {
-                dist[i] = prev[i] = INF;
-                nodes[i] = i;
+                return Path = ReconstructPath(prev, SRC, DEST);
             }
-
-            dist[SRC] = 0;
-            do
+            else
             {
-                int smallest = nodes[0];
-                int smallestIndex = 0;
-                for (int i = 1; i < graphSize; i++)
-                {
-                    if (dist[nodes[i]] < dist[smallest])
-                    {
-                        smallest = nodes[i];
-                        smallestIndex = i;
-                    }
-                }
-                graphSize--;
-                nodes[smallestIndex] = nodes[graphSize];
-
-                if (dist[smallest] == INF || smallest == DEST)
-                    break;
-
-                for (int i = 0; i < graphSize; i++)
-                {
-                    int v = nodes[i];
-                    int newDist = dist[smallest] + Convert.ToInt32(Graph[smallest, v]);
-                    if (newDist < dist[v])
-                    {
-                        dist[v] = newDist;
-                        prev[v] = smallest;
-                    }
-                }
-            } while (graphSize > 0);
-            return ReconstructPath(prev, SRC, DEST);
+                return null;
+            }
         }
 
         private bool isAnyUnvisited()
@@ -132,7 +87,7 @@ namespace Algorytmika
         private int getSmallestNodeNoVisited()
         {
             int node = INF;
-            int distance = INF;
+            double distance = INF;
             for (int i = 0; i < dist.Length; i++)
             {
                 if (visited[i] == NOVISITED && dist[i] <= distance)
@@ -144,9 +99,9 @@ namespace Algorytmika
             return node;
         }
 
-        public int getPathDistance()
+        public double getPathDistance()
         {
-            int distance = 0;
+            double distance = 0;
             int currentNode = 0;
             int nextNode = 0;
             distaneQueue = new Queue<int>();
@@ -164,18 +119,18 @@ namespace Algorytmika
             return distance;
         }
 
-        private int getPathCost(int src, int dst)
+        private double getPathCost(int src, int dst)
         {
             if (src == dst)
             {
                 return 0;
             }
             ArrayList nodes = list[src];
-            foreach (Node n in nodes)
+            foreach (NodeD n in nodes)
             {
-                if (n.Position == dst)
+                if (n.Index == dst)
                 {
-                    return n.Position;
+                    return n.Cost;
                 }
             }
             return INF;
@@ -188,6 +143,11 @@ namespace Algorytmika
             ret[currentNode] = DEST;
             while (ret[currentNode] != INF && ret[currentNode] != SRC)
             {
+                if (prev[ret[currentNode]] < 0 || prev[ret[currentNode]]>prev.Length)
+                {
+                    return null;
+                    break;
+                }
                 ret[currentNode + 1] = prev[ret[currentNode]];
                 currentNode++;
             }
@@ -199,34 +159,24 @@ namespace Algorytmika
             return reversed;
         }
 
-        public ArrayList[] setIncidenceList(int citiesNumber, int pathsCount, ArrayList[] list,double[,] distances)
+        public static ArrayList[] setIncidenceList(int cities,double[,] distances,List<Node> nodesList)
         {
             //TODO poprawic tworzenie listy incydencji 
-            string[] lineSplit;
-            int source = 0;
-            int dest = 0;
-            int count = 0;
-            double pathLength = 0;
-
-            //for (int i = 0; i < pathsCount; i++)
-            //{
-            //    lineSplit = fileStream.ReadLine().Split(' ');
-            //    source = int.Parse(lineSplit[0]);
-            //    dest = int.Parse(lineSplit[1]);
-            //    pathLength = int.Parse(lineSplit[2]);
-            //    Node n = new Node((dest), pathLength);
-            //    Node n1 = new Graph.Node((source), pathLength);
-            //    if (pathLength < 0)
-            //    {
-            //        throw new Exception("Distance can`t be less than 0");
-            //    }
-            //    else
-            //    {
-            //        list[source].Add(n);
-            //        list[dest].Add(n1);
-            //        count++;
-            //    }
-            //}
+            ArrayList[] list = new ArrayList[cities];
+            for(int i=0;i<cities;i++)
+            {
+                list[i] = new ArrayList();
+            }
+            for(int i=0;i< cities;i++)
+            {
+                for(int j=0;j< cities;j++)
+                {
+                    if(distances[i,j]!=0)
+                    {
+                        list[i].Add(new NodeD(j,distances[i,j]));
+                    }
+                }
+            }
             return list;
         }
     }

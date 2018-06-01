@@ -14,24 +14,18 @@ namespace Algorytmika
     class Algorithm
     {
         private int startedCity { get; set; } // miasto z ktorego zaczynami i konczymy
-
         private int quantity { get; set; } // ilosc tras ile mamy w
-
         private double Dmax { get; set; } // maksymalna trasa w km
-
         private int randomlyFlag = 0;
 
         public List<Node> NodesList { get; set; } // lista wszystkich punktow
         public List<Node> UnvisitedNodesList { get; set; } // lista wszystkich punktow
         public List<Tuple<Node, Node>> Connections = new List<Tuple<Node, Node>>();
-
         public double[,] NodeDistances { get; set; } // tablica dystansow.
-
         public int[] currentSequence;
-
-        private int numberOfNodes;
-
-        private int numberOfPaths;
+        public int numberOfNodes;
+        public int numberOfPaths;
+        Random rand = new Random();
 
         public bool LoadData(string path)
         {
@@ -198,10 +192,11 @@ namespace Algorytmika
             double profit = 0;
             List<Node> route = new List<Node>();    //construct route
             List<Node> unvisited = new List<Node>(NodesList);
-            route.Add(NodesList.ElementAt(0));      //add first point to route
             Node currentNode;
             Node startNode = new Node();
-            startNode = NodesList.ElementAt(0);
+            int random = rand.Next(0, NodesList.Count - 1);
+            startNode = NodesList.ElementAt(random);
+            route.Add(startNode);   //add start point to route
             unvisited.Remove(startNode);
             currentNode = startNode;
 
@@ -222,12 +217,13 @@ namespace Algorytmika
                 }
             }
 
-            UnvisitedNodesList = unvisited;
+            //UnvisitedNodesList = unvisited;
             Route r = new Route();
             r.CalculatedRoute = route;
             r.Distance = distance;
             r.RouteProfit = profit;
-
+            r.Unvisited = unvisited;
+            UnvisitedNodesList = unvisited;
             return r;
 
         }
@@ -262,11 +258,13 @@ namespace Algorytmika
                 }
             }
 
-            UnvisitedNodesList = unvisited;
+            
             Route r = new Route();
+            r.Unvisited = unvisited;
             r.CalculatedRoute = route;
             r.Distance = distance;
             r.RouteProfit = profit;
+            UnvisitedNodesList = unvisited;
 
             return r;
 
@@ -366,15 +364,60 @@ namespace Algorytmika
 
         }
 
+        public Route GreedyLocalSearch(int numberOfIterations)
+        {
+            List<Route> routs = new List<Route>();
+            for (int i=0; i < numberOfIterations;i++)
+            {
+                routs.Add(GreedyRouteConstruction(7600));
+            }
+            Route best = routs.ElementAt(0);
+            Route temp;
+            foreach(var r in routs)
+            {
+                temp = LocalSearch(r, 7600);
+                if(temp.RouteProfit>best.RouteProfit)
+                {
+                    best = temp;
+                }
+                
+            }
+            return best;
+        }
+
+        public Route GreedyLocalSearch2(int numberOfRouts)
+        {
+            // conctruct N routes then find best one and take localsearch on it
+            List<Route> routs = new List<Route>();
+            for (int i = 0; i < numberOfRouts; i++)
+            {
+                routs.Add(GreedyRouteConstruction(7600));
+            }
+            Route best = routs.ElementAt(0);
+
+            foreach(Route r in routs)
+            {
+                if(r.RouteProfit>best.RouteProfit)
+                {
+                    best = r;
+                }
+            }
+            best = LocalSearch(best, 7600);
+            return best;
+        }
+
         #endregion
 
-       public Route TwoOpt(Route currentRoute)
+        public Route TwoOpt(Route currentRoute)
         {
             List<Node> newRoute = new List<Node>();
+            List<Node> unvisited = new List<Node>(currentRoute.Unvisited);
             List<Node> bestRoute = new List<Node>(currentRoute.CalculatedRoute);
             int n = currentRoute.CalculatedRoute.Count;
             double newDist = 0;
+            double newProfit = 0;
             double bestDist = currentRoute.Distance;
+            double bestProfit = currentRoute.RouteProfit;
             bool improve = true;
                 while (improve)
                 {
@@ -398,16 +441,19 @@ namespace Algorytmika
             r.CalculatedRoute = bestRoute;
             r.Distance = bestDist;
             r.RouteProfit = CalcProfit(bestRoute);
+            r.Unvisited = unvisited;
             return r;
 
         }
 
         public Route Insert(Route currentRoute, int max)
         {
+            // przekazac liste nieodwiedzonych do trasy
             Route optiPath = new Route();
             int n = currentRoute.CalculatedRoute.Count;
             List<Node> tempPath = new List<Node>();
             List<Node> currentPath = new List<Node>(currentRoute.CalculatedRoute);
+            List<Node> unvisited = new List<Node>(currentRoute.Unvisited);
             double profit = currentRoute.RouteProfit;
             double tempProfit = 0;
             double tempDistance = 0;
@@ -417,11 +463,11 @@ namespace Algorytmika
             while (improve)
             {
                 improve = false;
-                for (int v = 0; v < UnvisitedNodesList.Count-1; v++)
+                for (int v = 0; v < unvisited.Count; v++)
                 {
                     for (int i = 1; i < n - 1; i++)
                     {
-                        tempPath = ConstructNewPath(i, UnvisitedNodesList.ElementAt(v), currentPath);
+                        tempPath = ConstructNewPath(i, unvisited.ElementAt(v), currentPath);
                         tempProfit = CalcProfit(tempPath);
                         tempDistance = CalcDistance(tempPath);
                         if ((tempProfit > profit) && (tempDistance <= max))
@@ -429,7 +475,7 @@ namespace Algorytmika
                             currentPath = tempPath;
                             profit = tempProfit;
                             improve = true;
-                            UnvisitedNodesList.RemoveAt(v);
+                            unvisited.RemoveAt(v);
 
                         }
                     }
@@ -439,7 +485,31 @@ namespace Algorytmika
             optiPath.RouteProfit = profit;
             optiPath.Distance = CalcDistance(currentPath);
             optiPath.CalculatedRoute = currentPath;
+            optiPath.Unvisited = unvisited;
             return optiPath;
+        }
+
+        public Route LocalSearch(Route route,int max)
+        {
+            double bestProfit = route.RouteProfit;
+            Route bestRout = route;
+            Route temp;
+            bool improve = true;
+            while(improve)
+            {
+                improve = false;
+                temp = TwoOpt(bestRout);
+                if (temp.Distance <= bestRout.Distance)
+                {
+                    temp = Insert(route, 7600);
+                    if (temp.RouteProfit>bestRout.RouteProfit)
+                    {
+                        improve = true;
+                        bestRout = temp;
+                    }
+                }
+            }
+            return bestRout;
         }
 
         public Route ConstructAnotherRoute(int maxDistance)
@@ -566,6 +636,7 @@ namespace Algorytmika
         public List<Node> CalculatedRoute { get; set; }
         public double RouteProfit { get; set; }
         public double Distance { get; set; }
+        public List<Node> Unvisited { get; set; }
     }
 
     class Node

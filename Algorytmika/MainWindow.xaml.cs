@@ -1,5 +1,6 @@
 ﻿using Microsoft.Maps.MapControl.WPF;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,6 +22,7 @@ namespace Algorytmika
     /// </summary>
     public partial class MainWindow : Window
     {
+        //TODO jakies okienko gdzie bedzie mozna wpisywac parametry trasy tzn ile kilometrow ma miec np mozna nawet gdzies z boku to dorobic
         private Algorithm alg;
         private Route route;
         private Double zoomMax = 5;
@@ -36,7 +38,7 @@ namespace Algorytmika
             route = new Route();
             CanvasBorder.BorderThickness = new Thickness(1);
             //alg.LoadData(@"D:\Studia\Algorytmika\Algorytmika\Algorytmika\test.txt");
-         
+
         }
 
         private void OpenFile(object sender, RoutedEventArgs e)
@@ -48,42 +50,64 @@ namespace Algorytmika
             openFileDialog1.Filter = "txt files (*.txt)|*.txt";
             openFileDialog1.FilterIndex = 2;
             openFileDialog1.RestoreDirectory = true;
-            
-            try
+
+            openFileDialog1.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            if (openFileDialog1.ShowDialog() == true)
             {
-                openFileDialog1.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                if (openFileDialog1.ShowDialog() == true)
+                canvas.Children.Clear();
+                filePath = openFileDialog1.FileName;
+                bool what = alg.LoadData(filePath);
+                if (what)
                 {
-                    canvas.Children.Clear();
-                    filePath = openFileDialog1.FileName;
-                    bool what = alg.LoadData(filePath);
-                    if (what)
-                    {
-                        scroll.Visibility = Visibility.Visible;
-                        bingMap.Visibility = Visibility.Collapsed;
-                        DrawPoints();
-                    }
-                    else if(!what)
-                    {
-                        scroll.Visibility = Visibility.Collapsed;
-                        bingMap.Visibility = Visibility.Visible;
-                        DrawPinsOnBingMap();
-                    }
+                    scroll.Visibility = Visibility.Visible;
+                    bingMap.Visibility = Visibility.Collapsed;
+                    DrawPoints();
                 }
-                //clear labels when new file loaded
-                profitL.Content = "";
-                lengthL.Content = "";
-                pointsL.Content = "";
+                else if (!what)
+                {
+                    scroll.Visibility = Visibility.Collapsed;
+                    bingMap.Visibility = Visibility.Visible;
+                    ArrayList[] incidenceList;
+                    incidenceList = Dijkstry.setIncidenceList(alg.numberOfNodes, alg.NodeDistances, alg.NodesList);
+                    Dijkstry a;
+                    for (int i = 0; i < alg.numberOfNodes - 1; i++)
+                    {
+                        for (int j = 0; j < alg.numberOfNodes; j++)
+                        {
+                            if (alg.NodeDistances[i, j] == 0 && i != j)
+                            {
+                                if (j > 93)
+                                {
+
+                                }
+                                a = new Dijkstry(incidenceList);
+                                int[] tempPath = a.GetPath(i, j);
+                                if (tempPath != null)
+                                {
+                                    double distance = a.getPathDistance();
+                                    alg.NodeDistances[i, j] = distance;
+                                    alg.NodeDistances[j, i] = distance;
+                                }
+                                else
+                                {
+                                    alg.NodeDistances[i, j] = double.MaxValue;
+                                    alg.NodeDistances[j, i] = double.MaxValue;
+                                }
+                            }
+                        }
+                    }
+                    DrawPinsOnBingMap();
+                }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error: Nie można odczytać pliku z danymi: " + ex.Message,"Wczytywanie danych",MessageBoxButton.OK,MessageBoxImage.Error);
-            }
+            //clear labels when new file loaded
+            profitL.Content = "";
+            lengthL.Content = "";
+            pointsL.Content = "";
         }
 
         private void DrawPoints()
         {
-            
+
             var maxValueX = alg.NodesList.Max(w => w.X) + 2.5;
             var maxValueY = alg.NodesList.Max(w => w.Y) + 2.5;
             canvas.Height = maxValueY;
@@ -93,7 +117,7 @@ namespace Algorytmika
             foreach (var node in alg.NodesList)
             {
                 var ellipse = new Ellipse() { Width = 4, Height = 4, Stroke = new SolidColorBrush(Colors.Black) };
-                ellipse.ToolTip = "Pozycja: "+node.Position +"\nProfit: "+node.Profit+"\nX: "+ node.X + "\nY: " + node.Y;
+                ellipse.ToolTip = "Pozycja: " + node.Position + "\nProfit: " + node.Profit + "\nX: " + node.X + "\nY: " + node.Y;
                 Canvas.SetLeft(ellipse, node.X);
                 Canvas.SetTop(ellipse, node.Y);
                 canvas.Children.Add(ellipse);
@@ -106,16 +130,30 @@ namespace Algorytmika
             {
                 // The pushpin to add to the map.
                 Pushpin pin = new Pushpin();
-                pin.Location = new Location(node.Y,node.X);
+                pin.Location = new Location(node.Y, node.X);
                 pin.ToolTip = "Pozycja: " + node.Position + "\nProfit: " + node.Profit + "\nX: " + node.X + "\nY: " + node.Y;
                 // Adds the pushpin to the map.
                 bingMap.Children.Add(pin);
-
             }
-
         }
 
-        private void DrawRoute(List<Node> routeView,Brush color)
+        private void DrawPolygonOnBingMap(List<Node> route)
+        {
+            MapPolyline polygon = new MapPolyline();
+            polygon.Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Transparent);
+            polygon.Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Blue);
+            polygon.StrokeThickness = 5;
+            polygon.Opacity = 0.7;
+            LocationCollection path = new LocationCollection();
+            foreach (var node in route)
+            {
+                path.Add(new Location(node.Y, node.X));
+            }
+            polygon.Locations = path;
+            bingMap.Children.Add(polygon);
+        }
+
+        private void DrawRoute(List<Node> routeView, Brush color)
         {
             for (int i = 0; i < routeView.Count - 1; i++)
             {
@@ -149,25 +187,39 @@ namespace Algorytmika
 
         private void MenuItem_OnClick(object sender, RoutedEventArgs e)
         {
-                canvas.Children.Clear();
-                DrawPoints();
-                route = alg.GreedyRouteConstruction(7600);
+            canvas.Children.Clear();
+            DrawPoints();
+            route = alg.GreedyRouteConstruction(7600);
+            if(what==false)
+            {
+                DrawPolygonOnBingMap(route.CalculatedRoute);
+            }
+            else if(what==true)
+            {
                 DrawRoute(route.CalculatedRoute, Brushes.Red);
-                profitL.Content = route.RouteProfit.ToString();
-                pointsL.Content = route.CalculatedRoute.Count.ToString();
-                lengthL.Content = route.Distance.ToString();
+            }
+            profitL.Content = route.RouteProfit.ToString();
+            pointsL.Content = route.CalculatedRoute.Count.ToString();
+            lengthL.Content = route.Distance.ToString();
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-                canvas.Children.Clear();
-                DrawPoints();
-                route = alg.GreedyRandomlyRouteConstruction(7600);
+            canvas.Children.Clear();
+            DrawPoints();
+            route = alg.GreedyRandomlyRouteConstruction(7600);
+            if (what == false)
+            {
+                DrawPolygonOnBingMap(route.CalculatedRoute);
+            }
+            else if (what == true)
+            {
                 DrawRoute(route.CalculatedRoute, Brushes.Red);
-                //show info about route in UI
-                profitL.Content = route.RouteProfit.ToString();
-                pointsL.Content = route.CalculatedRoute.Count.ToString();
-                lengthL.Content = route.Distance.ToString();
+            }
+            //show info about route in UI
+            profitL.Content = route.RouteProfit.ToString();
+            pointsL.Content = route.CalculatedRoute.Count.ToString();
+            lengthL.Content = route.Distance.ToString();
         }
 
         private void MenuItem_Click_1(object sender, RoutedEventArgs e)
@@ -181,8 +233,16 @@ namespace Algorytmika
                 lengthL.Content = a.Distance.ToString();
                 pointsL.Content = a.CalculatedRoute.Count();
                 canvas.Children.Clear();
-                DrawPoints();
-                DrawRoute(a.CalculatedRoute, Brushes.Red);
+                if (what == false)
+                {
+                    bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
+                    DrawPolygonOnBingMap(route.CalculatedRoute);
+                }
+                else if (what == true)
+                {
+                    DrawPoints();
+                    DrawRoute(route.CalculatedRoute, Brushes.Red);
+                }
             }
         }
 
@@ -191,19 +251,21 @@ namespace Algorytmika
             if (route != null)
             {
                 canvas.Children.Clear();
-                DrawPoints();
                 route = alg.TwoOpt(route);
-                //List<Node> optimalized = new List<Node>(o.CalculatedRoute);
-                //double profit = 0;
-                //double distance = 0;
-                //foreach (var n in optimalized)
-                //{
-                //    profit = profit + n.Profit;
-                //}
+
                 profitL.Content = route.RouteProfit.ToString();
                 lengthL.Content = route.Distance.ToString();
                 pointsL.Content = route.CalculatedRoute.Count();
-                DrawRoute(route.CalculatedRoute, Brushes.Red);
+                if (what == false)
+                {
+                    bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
+                    DrawPolygonOnBingMap(route.CalculatedRoute);
+                }
+                else if (what == true)
+                {
+                    DrawPoints();
+                    DrawRoute(route.CalculatedRoute, Brushes.Red);
+                }
             }
         }
 
@@ -215,7 +277,16 @@ namespace Algorytmika
                 profitL.Content = temp.RouteProfit.ToString();
                 lengthL.Content = temp.Distance.ToString();
                 pointsL.Content = temp.CalculatedRoute.Count();
-                DrawRoute(temp.CalculatedRoute, Brushes.Blue);
+                if (what == false)
+                {
+                    bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
+                    DrawPolygonOnBingMap(route.CalculatedRoute);
+                }
+                else if (what == true)
+                {
+                    DrawPoints();
+                    DrawRoute(route.CalculatedRoute, Brushes.Red);
+                }
             }
         }
 
@@ -251,6 +322,50 @@ namespace Algorytmika
             else
             {
                 canvas.RenderTransform = new ScaleTransform(zoom, zoom); // transform Canvas size
+            }
+        }
+
+        private void MenuItem_Click_4(object sender, RoutedEventArgs e)
+        {
+            if (route != null)
+            {
+                canvas.Children.Clear();
+                route = alg.LocalSearch(route, 7600);
+
+                profitL.Content = route.RouteProfit.ToString();
+                lengthL.Content = route.Distance.ToString();
+                pointsL.Content = route.CalculatedRoute.Count();
+                if (what == false)
+                {
+                    bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
+                    DrawPolygonOnBingMap(route.CalculatedRoute);
+                }
+                else if (what == true)
+                {
+                    DrawPoints();
+                    DrawRoute(route.CalculatedRoute, Brushes.Red);
+                }
+            }
+        }
+
+        private void MenuItem_Click_5(object sender, RoutedEventArgs e)
+        {
+            canvas.Children.Clear();
+            //route = alg.GreedyLocalSearch(20);
+            route = alg.GreedyLocalSearch2(100);
+
+            profitL.Content = route.RouteProfit.ToString();
+            lengthL.Content = route.Distance.ToString();
+            pointsL.Content = route.CalculatedRoute.Count();
+            if (what == false)
+            {
+                bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
+                DrawPolygonOnBingMap(route.CalculatedRoute);
+            }
+            else if (what == true)
+            {
+                DrawPoints();
+                DrawRoute(route.CalculatedRoute, Brushes.Red);
             }
         }
     }
