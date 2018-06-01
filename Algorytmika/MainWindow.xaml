@@ -24,7 +24,7 @@
             <Menu.Background>
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}"/>
             </Menu.Background>
-            <MenuItem Header="Plik">
+            <MenuItem Header="Plik" Click="MenuItem_Click_6">
                 <MenuItem Header="Wczytaj" Click="OpenFile">
                     <MenuItem.Icon>
                         <Image Source="Icons\window-open.png"/>
@@ -68,11 +68,11 @@
             </Border>
         </ScrollViewer>
 
-        <m:Map Grid.Row="1" Name="bingMap" CredentialsProvider="AjDiz9UIPwqjiEWzQHZCPK0Nw2zBzRqBB9S5iGFMnL1-MYmB-xEx3eg3hacOKS-I"/>
+        <m:Map Grid.Row="1" Grid.RowSpan="2" Name="bingMap" CredentialsProvider="AjDiz9UIPwqjiEWzQHZCPK0Nw2zBzRqBB9S5iGFMnL1-MYmB-xEx3eg3hacOKS-I"/>
 
         <Slider Grid.Row="2" Minimum="0.5" Maximum="5" Name="zoomSlider" Value="0" ValueChanged="zoomSlider_ValueChanged"/>
 
-        <GroupBox Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Header="Trasa">
+        <GroupBox Grid.Row="1" Grid.Column="1" Header="Trasa">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -93,6 +93,30 @@
                 <Label Grid.Row="0" Grid.Column="1" Margin="5" Name="profitL" Content="0" Foreground="Red" FontWeight="Bold"/>
                 <Label Grid.Row="1" Grid.Column="1" Margin="5" Name="lengthL" Content="0" FontWeight="Bold"/>
                 <Label Grid.Row="2" Grid.Column="1" Margin="5" Name="pointsL" Content="0" FontWeight="Bold"/>
+
+            </Grid>
+
+        </GroupBox>
+
+        <GroupBox Grid.Row="2" Grid.Column="1" Header="Plik">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Margin="5" Content="Ilość miast: "/>
+                <Label Grid.Row="1" Grid.Column="0" Margin="5" Content="Ilość połączeń: "/>
+                
+                <Label Grid.Row="0" Grid.Column="1" Margin="5" Name="citiesL" Content="0" FontWeight="Bold"/>
+                <Label Grid.Row="1" Grid.Column="1" Margin="5" Name="pathsL" Content="0" FontWeight="Bold"/>
 
             </Grid>
 

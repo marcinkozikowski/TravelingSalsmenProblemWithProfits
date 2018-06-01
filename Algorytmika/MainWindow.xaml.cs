@@ -1,4 +1,5 @@
-﻿using Microsoft.Maps.MapControl.WPF;
+﻿using Algorytmika.Windows;
+using Microsoft.Maps.MapControl.WPF;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -61,6 +62,8 @@ namespace Algorytmika
                 {
                     scroll.Visibility = Visibility.Visible;
                     bingMap.Visibility = Visibility.Collapsed;
+                    citiesL.Content = alg.numberOfNodes;
+                    pathsL.Content = alg.numberOfPaths;
                     DrawPoints();
                 }
                 else if (!what)
@@ -96,6 +99,8 @@ namespace Algorytmika
                             }
                         }
                     }
+                    citiesL.Content = alg.numberOfNodes;
+                    pathsL.Content = alg.numberOfPaths;
                     DrawPinsOnBingMap();
                 }
             }
@@ -367,6 +372,12 @@ namespace Algorytmika
                 DrawPoints();
                 DrawRoute(route.CalculatedRoute, Brushes.Red);
             }
+        }
+
+        private void MenuItem_Click_6(object sender, RoutedEventArgs e)
+        {
+            RouteConfigurationWindow a = new RouteConfigurationWindow();
+            a.ShowDialog();
         }
     }
 }
