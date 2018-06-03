@@ -14,30 +14,31 @@ using System.Windows.Shapes;
 
 namespace Algorytmika.Windows
 {
-    /// <summary>
-    /// Interaction logic for RouteConfigurationWindow.xaml
-    /// </summary>
-    public partial class RouteConfigurationWindow : Window
+    public partial class DijkstryWindow : Window
     {
-        double Distance { get; set; }
-        public RouteConfigurationWindow()
+        public int FROM { get; set; }
+        public int TO { get; set; }
+        internal DijkstryWindow(Algorithm alg)
         {
             InitializeComponent();
-        }
-
-        public double GetMaxRouteDistance()
-        {
-            return Convert.ToDouble(DistanceL.Text.ToString());
+            List<string> list = new List<string>();
+            foreach(var n in alg.NodesList)
+            {
+                list.Add(n.Position.ToString());
+            }
+            fromCombo.ItemsSource = list;
+            toCombo.ItemsSource = list;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = false;
             this.Close();
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            FROM = Convert.ToInt32(fromCombo.SelectedItem);
+            TO = Convert.ToInt32(toCombo.SelectedItem);
             this.DialogResult = true;
         }
     }

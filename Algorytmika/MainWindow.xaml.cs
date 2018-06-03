@@ -30,11 +30,13 @@ namespace Algorytmika
         private Double zoomMin = 0.5;
         private Double zoomSpeed = 0.001;
         private Double zoom = 1;
-        private bool what = false;  //if true then draw poin on canvas if false show on map
+        private bool what = false;  //if true then draw points on canvas if false show on map
+        ArrayList[] incidenceList= new ArrayList[0];
 
         public MainWindow()
         {
             InitializeComponent();
+            SetMenuDisabled();
             alg = new Algorithm();
             route = new Route();
             CanvasBorder.BorderThickness = new Thickness(1);
@@ -44,6 +46,11 @@ namespace Algorytmika
 
         private void OpenFile(object sender, RoutedEventArgs e)
         {
+            //clear labels when new file loaded
+            profitL.Content = "0";
+            lengthL.Content = "0";
+            pointsL.Content = "0";
+
             string filePath = "";
             Microsoft.Win32.OpenFileDialog openFileDialog1 = new Microsoft.Win32.OpenFileDialog();
 
@@ -57,20 +64,21 @@ namespace Algorytmika
             {
                 canvas.Children.Clear();
                 filePath = openFileDialog1.FileName;
-                bool what = alg.LoadData(filePath);
+                what = alg.LoadData(filePath);
                 if (what)
                 {
                     scroll.Visibility = Visibility.Visible;
                     bingMap.Visibility = Visibility.Collapsed;
                     citiesL.Content = alg.numberOfNodes;
                     pathsL.Content = alg.numberOfPaths;
+                    incidenceList = Dijkstry.setIncidenceList(alg.numberOfNodes, alg.NodeDistances, alg.NodesList);
                     DrawPoints();
+                    SetMenuEneabled();
                 }
                 else if (!what)
                 {
                     scroll.Visibility = Visibility.Collapsed;
                     bingMap.Visibility = Visibility.Visible;
-                    ArrayList[] incidenceList;
                     incidenceList = Dijkstry.setIncidenceList(alg.numberOfNodes, alg.NodeDistances, alg.NodesList);
                     Dijkstry a;
                     for (int i = 0; i < alg.numberOfNodes - 1; i++)
@@ -102,12 +110,10 @@ namespace Algorytmika
                     citiesL.Content = alg.numberOfNodes;
                     pathsL.Content = alg.numberOfPaths;
                     DrawPinsOnBingMap();
+                    SetMenuEneabled();
                 }
+                alg.incidenceList = incidenceList;
             }
-            //clear labels when new file loaded
-            profitL.Content = "";
-            lengthL.Content = "";
-            pointsL.Content = "";
         }
 
         private void DrawPoints()
@@ -142,11 +148,62 @@ namespace Algorytmika
             }
         }
 
-        private void DrawPolygonOnBingMap(List<Node> route)
+        private void DrawPolygonOnBingMap(List<Node> route, Color color)
         {
             MapPolyline polygon = new MapPolyline();
             polygon.Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Transparent);
-            polygon.Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Blue);
+            polygon.Stroke = new System.Windows.Media.SolidColorBrush(color);
+            polygon.StrokeThickness = 5;
+            polygon.Opacity = 0.7;
+            LocationCollection path = new LocationCollection();
+            for (int i = 0; i < route.Count - 2; i++)
+            {
+                if (alg.NodeDistancesDisjkstry[route.ElementAt(i).Position, route.ElementAt(i + 1).Position] == 0)
+                {
+                    Dijkstry di = new Dijkstry(incidenceList);
+                    int[] pathSD = di.GetPath(route.ElementAt(i).Position, route.ElementAt(i + 1).Position);
+                    List<Node> dijkstryPath = new List<Node>();
+                    if (pathSD != null)
+                    {
+                        //convert from int[] to List<Node>
+                        foreach (var p in pathSD)
+                        {
+                            foreach (var n in alg.NodesList)
+                            {
+                                if (n.Position == p)
+                                {
+                                    dijkstryPath.Add(n);
+                                    break;
+                                }
+                            }
+                        }
+
+                        foreach (var p in dijkstryPath)
+                        {
+                            path.Add(new Location(p.Y, p.X));
+                        }
+                    }
+                }
+                else
+                {
+                    path.Add(new Location(route.ElementAt(i).Y, route.ElementAt(i).X));
+                }
+            }
+            foreach (var node in route)
+            {
+
+                path.Add(new Location(node.Y, node.X));
+            }
+            path.Add(path.ElementAt(0)); //i do punktu poczatkowego
+            polygon.Locations = path;
+            bingMap.Children.Add(polygon);
+        }
+
+        private void DrawRouteOnBingMap(List<Node> route, Color color)
+        {
+            MapPolyline polygon = new MapPolyline();
+            polygon.Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Transparent);
+            polygon.Stroke = new System.Windows.Media.SolidColorBrush(color);
             polygon.StrokeThickness = 5;
             polygon.Opacity = 0.7;
             LocationCollection path = new LocationCollection();
@@ -190,107 +247,118 @@ namespace Algorytmika
             System.Windows.Application.Current.Shutdown();
         }
 
+        //zachlanna
         private void MenuItem_OnClick(object sender, RoutedEventArgs e)
         {
-            canvas.Children.Clear();
-            DrawPoints();
-            route = alg.GreedyRouteConstruction(7600);
-            if(what==false)
+            RouteConfigurationWindow rc = new RouteConfigurationWindow();
+            rc.ShowDialog();
+            if(rc.DialogResult==true)
             {
-                DrawPolygonOnBingMap(route.CalculatedRoute);
+                double dist = rc.GetMaxRouteDistance();
+                alg.Dmax = dist;
+                canvas.Children.Clear();
+                route = alg.GreedyRouteConstruction();
+                if (what == false)
+                {
+                    DrawPolygonOnBingMap(route.CalculatedRoute, Colors.Blue);
+                }
+                else if (what == true)
+                {
+                    DrawPoints();
+                    DrawRoute(route.CalculatedRoute, Brushes.Red);
+                }
+                profitL.Content = route.RouteProfit.ToString();
+                pointsL.Content = route.CalculatedRoute.Count.ToString();
+                lengthL.Content = route.Distance.ToString();
             }
-            else if(what==true)
-            {
-                DrawRoute(route.CalculatedRoute, Brushes.Red);
-            }
-            profitL.Content = route.RouteProfit.ToString();
-            pointsL.Content = route.CalculatedRoute.Count.ToString();
-            lengthL.Content = route.Distance.ToString();
         }
-
+        //zachlanno losowa
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            canvas.Children.Clear();
-            DrawPoints();
-            route = alg.GreedyRandomlyRouteConstruction(7600);
-            if (what == false)
+            RouteConfigurationWindow rc = new RouteConfigurationWindow();
+            rc.ShowDialog();
+            if (rc.DialogResult == true)
             {
-                DrawPolygonOnBingMap(route.CalculatedRoute);
+                double dist = rc.GetMaxRouteDistance();
+                alg.Dmax = dist;
+                canvas.Children.Clear();
+                route = alg.GreedyRandomlyRouteConstruction();
+                if (what == false)
+                {
+                    DrawPolygonOnBingMap(route.CalculatedRoute, Colors.Blue);
+                }
+                else if (what == true)
+                {
+                    DrawPoints();
+                    DrawRoute(route.CalculatedRoute, Brushes.Red);
+                }
+                profitL.Content = route.RouteProfit.ToString();
+                pointsL.Content = route.CalculatedRoute.Count.ToString();
+                lengthL.Content = route.Distance.ToString();
             }
-            else if (what == true)
-            {
-                DrawRoute(route.CalculatedRoute, Brushes.Red);
-            }
-            //show info about route in UI
-            profitL.Content = route.RouteProfit.ToString();
-            pointsL.Content = route.CalculatedRoute.Count.ToString();
-            lengthL.Content = route.Distance.ToString();
         }
-
+        // 2-opt INSERT
         private void MenuItem_Click_1(object sender, RoutedEventArgs e)
         {
             if (route != null)
             {
-                canvas.Children.Clear();
-                DrawPoints();
-                Route a = alg.Insert(route, 7600);
-                profitL.Content = a.RouteProfit.ToString();
-                lengthL.Content = a.Distance.ToString();
-                pointsL.Content = a.CalculatedRoute.Count();
-                canvas.Children.Clear();
-                if (what == false)
-                {
-                    bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
-                    DrawPolygonOnBingMap(route.CalculatedRoute);
+                    canvas.Children.Clear();
+                    route = alg.Insert(route, alg.Dmax);
+                    if (what == false)
+                    {
+                        bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
+                        DrawPolygonOnBingMap(route.CalculatedRoute, Colors.Blue);
+                    }
+                    else if (what == true)
+                    {
+                        canvas.Children.Clear();
+                        DrawPoints();
+                        DrawRoute(route.CalculatedRoute, Brushes.Red);
+                    }
+                    profitL.Content = route.RouteProfit.ToString();
+                    pointsL.Content = route.CalculatedRoute.Count.ToString();
+                    lengthL.Content = route.Distance.ToString();
                 }
-                else if (what == true)
-                {
-                    DrawPoints();
-                    DrawRoute(route.CalculatedRoute, Brushes.Red);
-                }
-            }
         }
-
+        // 2opt
         private void MenuItem_Click_2(object sender, RoutedEventArgs e)
         {
-            if (route != null)
-            {
-                canvas.Children.Clear();
-                route = alg.TwoOpt(route);
-
-                profitL.Content = route.RouteProfit.ToString();
-                lengthL.Content = route.Distance.ToString();
-                pointsL.Content = route.CalculatedRoute.Count();
-                if (what == false)
+                if (route != null)
                 {
-                    bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
-                    DrawPolygonOnBingMap(route.CalculatedRoute);
+                        route = alg.TwoOpt(route);
+                        profitL.Content = route.RouteProfit.ToString();
+                        lengthL.Content = route.Distance.ToString();
+                        pointsL.Content = route.CalculatedRoute.Count();
+                        if (what == false)
+                        {
+                            bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
+                            DrawPolygonOnBingMap(route.CalculatedRoute, Colors.Blue);
+                        }
+                        else if (what == true)
+                        {
+                            canvas.Children.Clear();
+                            DrawPoints();
+                            DrawRoute(route.CalculatedRoute, Brushes.Red);
+                        }
                 }
-                else if (what == true)
-                {
-                    DrawPoints();
-                    DrawRoute(route.CalculatedRoute, Brushes.Red);
-                }
-            }
         }
-
+        // druga trasa
         private void MenuItem_Click_3(object sender, RoutedEventArgs e)
         {
             if (route != null)
             {
-                Route temp = alg.ConstructAnotherRoute(7600);
-                profitL.Content = temp.RouteProfit.ToString();
-                lengthL.Content = temp.Distance.ToString();
-                pointsL.Content = temp.CalculatedRoute.Count();
+                Route temp = alg.ConstructAnotherRoute(7600,route);
+                profitL2.Content = temp.RouteProfit.ToString();
+                lengthL2.Content = temp.Distance.ToString();
+                pointsL2.Content = temp.CalculatedRoute.Count();
                 if (what == false)
                 {
-                    bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
-                    DrawPolygonOnBingMap(route.CalculatedRoute);
+                    DrawPolygonOnBingMap(temp.CalculatedRoute, Colors.Red);
                 }
                 else if (what == true)
                 {
                     DrawPoints();
-                    DrawRoute(route.CalculatedRoute, Brushes.Red);
+                    DrawRoute(temp.CalculatedRoute, Brushes.Blue);
                 }
             }
         }
@@ -329,55 +397,152 @@ namespace Algorytmika
                 canvas.RenderTransform = new ScaleTransform(zoom, zoom); // transform Canvas size
             }
         }
-
+        //local search
         private void MenuItem_Click_4(object sender, RoutedEventArgs e)
         {
             if (route != null)
             {
-                canvas.Children.Clear();
-                route = alg.LocalSearch(route, 7600);
+                RouteConfigurationWindow rc = new RouteConfigurationWindow();
+                rc.ShowDialog();
+                if (rc.DialogResult == true)
+                {
+                    double dist = rc.GetMaxRouteDistance();
+                    alg.Dmax = dist;
+                    route = alg.LocalSearch(route);
+                    profitL.Content = route.RouteProfit.ToString();
+                    lengthL.Content = route.Distance.ToString();
+                    pointsL.Content = route.CalculatedRoute.Count();
+                    if (what == false)
+                    {
+                        bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
+                        DrawPolygonOnBingMap(route.CalculatedRoute, Colors.Blue);
+                    }
+                    else if (what == true)
+                    {
+                        canvas.Children.Clear();
+                        DrawPoints();
+                        DrawRoute(route.CalculatedRoute, Brushes.Red);
+                    }
+                }
+            }
+        }
+        //GreedyLocalSearch2
+        private void MenuItem_Click_5(object sender, RoutedEventArgs e)
+        {
 
+            RouteConfigurationWindow rc = new RouteConfigurationWindow();
+            rc.ShowDialog();
+            if (rc.DialogResult == true)
+            {
+                double dist = rc.GetMaxRouteDistance();
+                alg.Dmax = dist;
+                route = alg.GreedyLocalSearch2(2000);
                 profitL.Content = route.RouteProfit.ToString();
                 lengthL.Content = route.Distance.ToString();
                 pointsL.Content = route.CalculatedRoute.Count();
                 if (what == false)
                 {
                     bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
-                    DrawPolygonOnBingMap(route.CalculatedRoute);
+                    DrawPolygonOnBingMap(route.CalculatedRoute, Colors.Blue);
                 }
                 else if (what == true)
                 {
+                    canvas.Children.Clear();
                     DrawPoints();
                     DrawRoute(route.CalculatedRoute, Brushes.Red);
                 }
             }
         }
-
-        private void MenuItem_Click_5(object sender, RoutedEventArgs e)
+        //Dijkstry path
+        private void MenuItem_Click_6(object sender, RoutedEventArgs e)
         {
-            canvas.Children.Clear();
-            //route = alg.GreedyLocalSearch(20);
-            route = alg.GreedyLocalSearch2(100);
+            int SRC = 0;
+            int DST = 0;
+            DijkstryWindow dq = new DijkstryWindow(alg);
+            dq.ShowDialog();
+            if(dq.DialogResult==true)
+            {
+                SRC = dq.FROM;
+                DST = dq.TO;
 
-            profitL.Content = route.RouteProfit.ToString();
-            lengthL.Content = route.Distance.ToString();
-            pointsL.Content = route.CalculatedRoute.Count();
-            if (what == false)
-            {
-                bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
-                DrawPolygonOnBingMap(route.CalculatedRoute);
-            }
-            else if (what == true)
-            {
-                DrawPoints();
-                DrawRoute(route.CalculatedRoute, Brushes.Red);
+                Dijkstry di = new Dijkstry(incidenceList);
+                List<Node> dijkstryPath = new List<Node>();
+                int[] path = di.GetPath(SRC, DST);
+                if(path!=null)
+                {
+                    //convert from int[] to List<Node>
+                    foreach (var p in path)
+                    {
+                        foreach (var n in alg.NodesList)
+                        {
+                            if (n.Position == p)
+                            {
+                                dijkstryPath.Add(n);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (what == true)
+                    {
+                        canvas.Children.Clear();
+                        DrawPoints();
+                        DrawRoute(dijkstryPath, Brushes.Red);
+                    }
+                    else if (what == false)
+                    {
+                        DrawRouteOnBingMap(dijkstryPath, Colors.Red);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Niespójność danych, trasa nie istnieje", "Błąd danych wejściowych", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
-        private void MenuItem_Click_6(object sender, RoutedEventArgs e)
+        private void SetMenuDisabled()
         {
-            RouteConfigurationWindow a = new RouteConfigurationWindow();
-            a.ShowDialog();
+            RouteConstructionTypeMenu.IsEnabled = false;
+            RouteOptimalizationManu.IsEnabled = false;
+            AnotherRouteMenu.IsEnabled = false;
+            RouteABMenu.IsEnabled = false;
+        }
+
+        private void SetMenuEneabled()
+        {
+            RouteConstructionTypeMenu.IsEnabled = true;
+            RouteOptimalizationManu.IsEnabled = true;
+            AnotherRouteMenu.IsEnabled = true;
+            RouteABMenu.IsEnabled = true;
+        }
+
+        //GreedyLocalSerch
+        private void MenuItem_Click_7(object sender, RoutedEventArgs e)
+        {
+            RouteConfigurationWindow rc = new RouteConfigurationWindow();
+            rc.ShowDialog();
+            if (rc.DialogResult == true)
+            {
+                double dist = rc.GetMaxRouteDistance();
+                alg.Dmax = dist;
+                //number of iterations
+                route = alg.GreedyLocalSearch(5);
+                profitL.Content = route.RouteProfit.ToString();
+                lengthL.Content = route.Distance.ToString();
+                pointsL.Content = route.CalculatedRoute.Count();
+                if (what == false)
+                {
+                    bingMap.Children.RemoveAt(bingMap.Children.Count - 1);
+                    DrawPolygonOnBingMap(route.CalculatedRoute, Colors.Blue);
+                }
+                else if (what == true)
+                {
+                    canvas.Children.Clear();
+                    DrawPoints();
+                    DrawRoute(route.CalculatedRoute, Brushes.Red);
+                }
+            }
         }
     }
 }

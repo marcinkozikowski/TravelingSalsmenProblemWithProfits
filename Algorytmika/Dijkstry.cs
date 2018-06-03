@@ -146,7 +146,6 @@ namespace Algorytmika
                 if (prev[ret[currentNode]] < 0 || prev[ret[currentNode]]>prev.Length)
                 {
                     return null;
-                    break;
                 }
                 ret[currentNode + 1] = prev[ret[currentNode]];
                 currentNode++;
@@ -167,6 +166,7 @@ namespace Algorytmika
             {
                 list[i] = new ArrayList();
             }
+
             for(int i=0;i< cities;i++)
             {
                 for(int j=0;j< cities;j++)

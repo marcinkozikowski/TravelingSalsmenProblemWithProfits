@@ -45,3 +45,5 @@ C:\Users\Dell\Source\Repos\TravelingSalsmenProblemWithProfits\Algorytmika\bin\De
 C:\Users\Dell\Source\Repos\TravelingSalsmenProblemWithProfits\Algorytmika\bin\Debug\Microsoft.Maps.MapControl.WPF.xml
 C:\Users\Dell\Source\Repos\TravelingSalsmenProblemWithProfits\Algorytmika\obj\Debug\Windows\RouteConfigurationWindow.g.cs
 C:\Users\Dell\Source\Repos\TravelingSalsmenProblemWithProfits\Algorytmika\obj\Debug\Windows\RouteConfigurationWindow.baml
+C:\Users\Dell\Source\Repos\TravelingSalsmenProblemWithProfits\Algorytmika\obj\Debug\Windows\DijkstryWindow.g.cs
+C:\Users\Dell\Source\Repos\TravelingSalsmenProblemWithProfits\Algorytmika\obj\Debug\Windows\DijkstryWindow.baml
