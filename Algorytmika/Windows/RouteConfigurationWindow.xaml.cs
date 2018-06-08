@@ -20,9 +20,16 @@ namespace Algorytmika.Windows
     public partial class RouteConfigurationWindow : Window
     {
         double Distance { get; set; }
-        public RouteConfigurationWindow()
+        int City { get; set; }
+        internal RouteConfigurationWindow(Algorithm alg)
         {
             InitializeComponent();
+            List<int> cities = new List<int>();
+            foreach(var c in alg.NodesList)
+            {
+                cities.Add(c.Position);
+            }
+            citiesComboBox.ItemsSource = cities;
         }
 
         public double GetMaxRouteDistance()

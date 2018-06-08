@@ -247,7 +247,6 @@ namespace Algorytmika
                     break;
                 }
             }
-            route.Add(route.ElementAt(0));
             //UnvisitedNodesList = unvisited;
             Route r = new Route();
             r.CalculatedRoute = route;
@@ -384,10 +383,13 @@ namespace Algorytmika
             {
                 if (current != n)
                 {
-                    if ((n.Profit) / (NodeDistances[current.Position, n.Position]) > bestProfit)
+                    if (NodeDistances[current.Position, n.Position] != double.MaxValue)
                     {
-                        best = n;
-                        bestProfit = (n.Profit) / (NodeDistances[current.Position, n.Position]);
+                        if ((n.Profit) / (NodeDistances[current.Position, n.Position]) > bestProfit)
+                        {
+                            best = n;
+                            bestProfit = (n.Profit) / (NodeDistances[current.Position, n.Position]);
+                        }
                     }
                 }
             }
@@ -450,6 +452,7 @@ namespace Algorytmika
                     best = r;
                 }
             }
+            //best.CalculatedRoute.Add(best.CalculatedRoute.ElementAt(0));
             best = LocalSearch(best);
             return best;
         }
@@ -470,9 +473,9 @@ namespace Algorytmika
                 while (improve)
                 {
                     improve = false;
-                    for (int i = 1; i < n - 1; i++)
+                    for (int i = 0; i < n - 1; i++)
                     {
-                        for (int k = i + 1; k < n - 0; k++)
+                        for (int k = i + 1; k < n; k++)
                         {
                             newRoute = optSwap(bestRoute, i, k);
                             newDist = CalcDistance(newRoute);
@@ -596,8 +599,7 @@ namespace Algorytmika
             r.RouteProfit = profit;
             r.Unvisited = unvisited;
 
-            r = TwoOpt(r);
-            r = Insert(r, Dmax);
+            r = LocalSearch(r);
 
             return r;
         }

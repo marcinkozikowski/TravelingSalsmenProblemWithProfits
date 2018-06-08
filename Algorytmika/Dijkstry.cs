@@ -64,7 +64,7 @@ namespace Algorytmika
             int[] tempPath = ReconstructPath(prev, SRC, DEST);
             if (tempPath != null)
             {
-                return Path = ReconstructPath(prev, SRC, DEST);
+                return Path = tempPath;
             }
             else
             {
@@ -175,6 +175,11 @@ namespace Algorytmika
                     {
                         list[i].Add(new NodeD(j,distances[i,j]));
                     }
+                    else if(distances[i,j]==0)
+                    {
+                        distances[i, j] = double.MaxValue;
+                    }
+                         
                 }
             }
             return list;

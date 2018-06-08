@@ -48,13 +48,13 @@
             <MenuItem Header="Konstrukcja Ścieżki" Name="RouteConstructionTypeMenu">
                 <MenuItem Header="Zachłanna" Click="MenuItem_OnClick" />
                 <MenuItem Header="Zachłanno-losowa" Click="MenuItem_Click"/>
+                <MenuItem Header="Greedy+LocalSearch N_Routs" Click="MenuItem_Click_5" />
             </MenuItem>
             <MenuItem Header="Optymalizacja Ścieżki" Name="RouteOptimalizationManu">
                 <MenuItem Header="Optymalizacja 2-opt" Click="MenuItem_Click_2" />
                 <MenuItem Header="Optymalizacja 2-opt INSERT" Click="MenuItem_Click_1"/>
                 <MenuItem Header="LocalSearch" Click="MenuItem_Click_4" />
                 <MenuItem Header="Greedy + LocalSearch" Click="MenuItem_Click_7" />
-                <MenuItem Header="Greedy + LocalSearch N" Click="MenuItem_Click_5" />
             </MenuItem>
             <MenuItem Header="Kolejna trasa"  Name="AnotherRouteMenu">
                 <MenuItem Header="Wyznacz kolejną trasę" Click="MenuItem_Click_3" />
@@ -76,7 +76,18 @@
 
         <m:Map Grid.Row="1" Grid.RowSpan="3" Name="bingMap" CredentialsProvider="AjDiz9UIPwqjiEWzQHZCPK0Nw2zBzRqBB9S5iGFMnL1-MYmB-xEx3eg3hacOKS-I" Visibility="Visible"/>
 
-        <Slider Grid.Row="4" Minimum="0.5" Maximum="5" Name="zoomSlider" Value="0" ValueChanged="zoomSlider_ValueChanged" Visibility="Visible"/>
+        <Grid Grid.Row="4">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+
+            </Grid.RowDefinitions>
+            <Slider Grid.Row="0" Minimum="0.5" Maximum="5" Name="zoomSlider" Value="0" ValueChanged="zoomSlider_ValueChanged" Visibility="Visible"/>
+            <Grid Margin="20" Grid.Row="0" Name="ProgressBar">
+                <ProgressBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Maximum="0" IsIndeterminate="True" Name="progress"/>
+                <TextBlock Text="Trwa łądowanie danych..." HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+        </Grid>
 
         <GroupBox Grid.Row="1" Grid.Column="1" Header="Trasa" Margin="5">
             <Grid>
@@ -85,6 +96,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 
                 <Grid.ColumnDefinitions>
@@ -99,6 +111,8 @@
                 <Label Grid.Row="0" Grid.Column="1" Margin="5" Name="profitL" Content="0" Foreground="Red" FontWeight="Bold"/>
                 <Label Grid.Row="1" Grid.Column="1" Margin="5" Name="lengthL" Content="0" FontWeight="Bold"/>
                 <Label Grid.Row="2" Grid.Column="1" Margin="5" Name="pointsL" Content="0" FontWeight="Bold"/>
+
+                <Button Name="clearButton" Grid.Row="4" Click="clearButton_Click" Content="Wyczyść" Grid.ColumnSpan="2" Width="100"/>
 
             </Grid>
 
@@ -148,9 +162,8 @@
                     <Label Grid.Row="1" Grid.Column="0" Margin="5" Content="Ilość połączeń: "/>
 
                     <Label Grid.Row="0" Grid.Column="1" Margin="5" Name="citiesL" Content="0" FontWeight="Bold"/>
-                    <Label Grid.Row="1" Grid.Column="1" Margin="5" Name="pathsL" Content="0" FontWeight="Bold"/>
-
-                </Grid>
+                <Label Grid.Row="1" Grid.Column="1" Margin="5" Name="pathsL" Content="0" FontWeight="Bold"/>
+            </Grid>
 
             </GroupBox>
     </Grid>

@@ -34,7 +34,7 @@
                 <Label Content="Miasto początkowe " Grid.Row="1" Grid.Column="0" Margin="5" Padding="5"/>
 
                 <TextBox Grid.Row="0" Grid.Column="1" Name="DistanceL" Margin="5" Padding="5" Grid.ColumnSpan="2"/>
-                <ComboBox Grid.Row="1" Grid.Column="1" Margin="5" Padding="5" Grid.ColumnSpan="2"/>
+                <ComboBox Grid.Row="1" Grid.Column="1" Margin="5" Padding="5" Grid.ColumnSpan="2" Name="citiesComboBox"/>
             </Grid>
         </GroupBox>
 
