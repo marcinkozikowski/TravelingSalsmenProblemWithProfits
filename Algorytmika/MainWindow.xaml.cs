@@ -396,7 +396,6 @@ namespace Algorytmika
                 {
                     Console.Write(n.Position + 1 + " ");
                 }
-                Console.Write(temp.CalculatedRoute.ElementAt(0).Position + 1);
             }
         }
 
@@ -484,7 +483,6 @@ namespace Algorytmika
                     {
                         Console.Write(n.Position+1+ " ");
                     }
-                Console.Write(route.CalculatedRoute.ElementAt(0).Position+1);
                 }
         }
         //Dijkstry path

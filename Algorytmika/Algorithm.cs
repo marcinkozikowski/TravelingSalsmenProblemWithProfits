@@ -210,8 +210,9 @@ namespace Algorytmika
             List<Node> unvisited = new List<Node>(NodesList);
             Node currentNode;
             Node startNode = new Node();
-            int random = rand.Next(0, NodesList.Count - 1);
-            startNode = NodesList.ElementAt(random);
+            //int random = rand.Next(0, NodesList.Count - 1);
+            //random = rand.Next(0, NodesList.Count - 1);
+            startNode = NodesList.ElementAt(0);
             route.Add(startNode);   //add start point to route
             unvisited.Remove(startNode);
             currentNode = startNode;
@@ -221,32 +222,19 @@ namespace Algorytmika
                 Node best = GetTheBestNode(currentNode,unvisited,distance,profit); //get whivh has the best overal profil to distance
                 if (CheckDistance(distance, Dmax, currentNode,best,startNode)) //check wether route back to start is possible
                 {
-                    distance = distance + NodeDistances[currentNode.Position, best.Position];
-                    //if(NodeDistancesDisjkstry[currentNode.Position, best.Position]==0)
-                    //{
-                    //    //if route is calculated by dijkstry add point beetween them
-                    //    List<Node> temp = getDijkstryNodes(currentNode.Position, best.Position);
-                    //    foreach(var n in temp)
-                    //    {
-                    //        profit = profit + n.Profit;
-                    //        route.Add(n);
-                    //        unvisited.Remove(n);
-                    //        currentNode = n;
-                    //    }
-                    //}
-                    //else
-                    {
+                        distance = distance + NodeDistances[currentNode.Position, best.Position];
                         profit = profit + best.Profit;
                         route.Add(best);
                         unvisited.Remove(best);
                         currentNode = best;
-                    }
                 }
                 else
                 {
                     break;
                 }
             }
+            route.Add(route.ElementAt(0));
+            distance = distance + NodeDistances[route.ElementAt(route.Count() - 2).Position, route.ElementAt(route.Count() - 1).Position];
             //UnvisitedNodesList = unvisited;
             Route r = new Route();
             r.CalculatedRoute = route;
@@ -352,7 +340,6 @@ namespace Algorytmika
                     return true;
                 }
             }
-
             return false;
         }
 
@@ -473,9 +460,9 @@ namespace Algorytmika
                 while (improve)
                 {
                     improve = false;
-                    for (int i = 0; i < n - 1; i++)
+                    for (int i = 1; i < n - 1; i++)
                     {
-                        for (int k = i + 1; k < n; k++)
+                        for (int k = i + 1; k < n-1; k++)
                         {
                             newRoute = optSwap(bestRoute, i, k);
                             newDist = CalcDistance(newRoute);
@@ -625,7 +612,7 @@ namespace Algorytmika
         private double CalcDistance(List<Node> route)
         {
             double dist = 0;
-            for (int i = 0; i < route.Count - 2; i++)
+            for (int i = 0; i <= route.Count - 2; i++)
             {
                 dist = dist + NodeDistances[route.ElementAt(i).Position, route.ElementAt(i + 1).Position];
             }
