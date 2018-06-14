@@ -580,6 +580,8 @@ namespace Algorytmika
                 }
             }
             UnvisitedNodesList = unvisited;
+            route.Add(route.ElementAt(0));
+            distance = distance + NodeDistances[route.ElementAt(route.Count() - 2).Position, route.ElementAt(route.Count() - 1).Position];
             Route r = new Route();
             r.CalculatedRoute = route;
             r.Distance = distance;
